@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/reports")
+@RequestMapping("/api/reports")
 public class ReportController {
     private final ReportQueryService reportQueryService;
     private final GenerateReportCommandHandler generateReportCommandHandler;
