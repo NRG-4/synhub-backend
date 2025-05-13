@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import nrg.inc.synhubbackend.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
-import nrg.inc.synhubbackend.shared.domain.model.entities.AuditableModel;
 import nrg.inc.synhubbackend.taskManagement.domain.model.commands.CreateTaskCommand;
 import nrg.inc.synhubbackend.taskManagement.domain.model.valueobjects.Task_Status;
 
