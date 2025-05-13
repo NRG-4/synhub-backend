@@ -20,7 +20,7 @@ public class Request extends AuditableAbstractAggregateRoot<Request> {
 
     public Request() {
         this.requestStatus = RequestStatus.PENDING;
-        this.requestType = RequestType.TASK_SUBMISSION;
+        this.requestType = RequestType.SUBMISSION;
     }
 
     public Request(String description, RequestType requestType, RequestStatus requestStatus, Long taskId, Long memberId) {
@@ -33,7 +33,7 @@ public class Request extends AuditableAbstractAggregateRoot<Request> {
 
     public Request(CreateRequestCommand command) {
         this.description = command.description();
-        this.requestType = RequestType.fromString(command.type());
+        this.requestType = RequestType.fromString(command.requestType());
         this.requestStatus = RequestStatus.PENDING;
         this.taskId = command.taskId();
         this.memberId = command.memberId();

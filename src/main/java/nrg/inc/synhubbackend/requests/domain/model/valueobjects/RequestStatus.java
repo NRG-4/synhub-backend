@@ -11,6 +11,6 @@ public enum RequestStatus {
                 return requestStatus;
             }
         }
-        throw new IllegalArgumentException("Unknown status: " + status);
+        throw new IllegalArgumentException("Unknown request status: " + status);
     }
 }

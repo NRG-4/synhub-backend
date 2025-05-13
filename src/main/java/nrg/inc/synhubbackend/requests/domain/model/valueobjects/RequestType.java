@@ -1,8 +1,8 @@
 package nrg.inc.synhubbackend.requests.domain.model.valueobjects;
 
 public enum RequestType {
-    TASK_SUBMISSION,
-    TASK_MODIFICATION;
+    SUBMISSION,
+    MODIFICATION;
 
     public static RequestType fromString(String type) {
         for (RequestType requestType : RequestType.values()) {
@@ -10,6 +10,6 @@ public enum RequestType {
                 return requestType;
             }
         }
-        throw new IllegalArgumentException("Unknown type: " + type);
+        throw new IllegalArgumentException("Unknown request type: " + type);
     }
 }
