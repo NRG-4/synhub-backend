@@ -24,7 +24,7 @@ public class TaskCommandServiceImpl implements TaskCommandService {
     public Optional<Task> handle(CreateTaskCommand command) {
         var task = new Task(command);
         var member = this.memberRepository.findById(command.memberId());
-        if (member.isPresent()) {
+        if (member.isEmpty()) {
             throw new IllegalArgumentException("Member with id " + command.memberId() + " does not exist");
         }
         task.setMember(member.get());
