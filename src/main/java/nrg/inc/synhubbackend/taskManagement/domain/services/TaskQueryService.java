@@ -1,6 +1,7 @@
 package nrg.inc.synhubbackend.taskManagement.domain.services;
 
 import nrg.inc.synhubbackend.taskManagement.domain.model.aggregates.Task;
+import nrg.inc.synhubbackend.taskManagement.domain.model.queries.GetAllTaskByStatusQuery;
 import nrg.inc.synhubbackend.taskManagement.domain.model.queries.GetAllTasksQuery;
 import nrg.inc.synhubbackend.taskManagement.domain.model.queries.GetTaskByIdQuery;
 import nrg.inc.synhubbackend.taskManagement.domain.model.queries.GetAllTasksByMemberId;
@@ -29,4 +30,11 @@ public interface TaskQueryService {
      * @return
      */
     List<Task> handle(GetAllTasksByMemberId query);
+
+    /**
+     * Retrieves tasks by their status.
+     * @param query
+     * @return
+     */
+    List<Task> handle(GetAllTaskByStatusQuery query);
 }

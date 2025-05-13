@@ -11,5 +11,5 @@ import java.util.Optional;
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long> {
     List<Task> findByMemberId(Long memberId);
-    Optional<Task> findByStatus(TaskStatus status);
+    List<Task> findByStatus(TaskStatus status);
 }
