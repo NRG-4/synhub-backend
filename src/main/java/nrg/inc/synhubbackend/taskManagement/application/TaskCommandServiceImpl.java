@@ -45,7 +45,7 @@ public class TaskCommandServiceImpl implements TaskCommandService {
             throw new IllegalArgumentException("Task with id " + taskId + " does not exist");
         }
         var taskToUpdate = this.taskRepository.findById(taskId).get();
-        if(memberId != null) {
+        if(memberId != null && memberId != 0) {
             if(!memberRepository.existsById(memberId)) {
                 throw new IllegalArgumentException("Member with id " + memberId + " does not exist");
             }
