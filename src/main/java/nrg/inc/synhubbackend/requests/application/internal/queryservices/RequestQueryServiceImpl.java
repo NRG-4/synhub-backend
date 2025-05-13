@@ -32,6 +32,6 @@ public class RequestQueryServiceImpl implements RequestQueryService {
 
     @Override
     public Optional<Request> handle(GetRequestByIdQuery query) {
-        return this.requestRepository.findByRequestId(query.requestId());
+        return this.requestRepository.findById(query.requestId());
     }
 }
