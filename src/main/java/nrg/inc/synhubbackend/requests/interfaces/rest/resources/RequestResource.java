@@ -1,4 +1,4 @@
 package nrg.inc.synhubbackend.requests.interfaces.rest.resources;
 
-public class RequestResource {
+public record RequestResource() {
 }

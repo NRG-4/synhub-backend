@@ -1,4 +1,4 @@
 package nrg.inc.synhubbackend.requests.domain.model.queries;
 
-public class GetRequestByIdQuery {
+public record GetRequestByIdQuery() {
 }
