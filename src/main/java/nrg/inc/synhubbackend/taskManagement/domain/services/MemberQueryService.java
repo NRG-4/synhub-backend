@@ -8,13 +8,14 @@ import java.util.List;
 import java.util.Optional;
 
 public interface MemberQueryService {
+
     /**
      * Retrieves a member by their ID.
      *
-     * @param memberId the ID of the member to retrieve
-     * @return the member with the specified ID
+     * @param query the query containing the member ID
+     * @return an Optional containing the member if found, or empty if not found
      */
-    Optional<Member> handle(GetMemberByIdQuery v);
+    Optional<Member> handle(GetMemberByIdQuery query);
 
     /**
      * Retrieves all members.
