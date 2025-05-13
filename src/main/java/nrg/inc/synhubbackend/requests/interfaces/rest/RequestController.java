@@ -9,6 +9,7 @@ import nrg.inc.synhubbackend.requests.domain.services.RequestCommandService;
 import nrg.inc.synhubbackend.requests.domain.services.RequestQueryService;
 import nrg.inc.synhubbackend.requests.interfaces.rest.resources.CreateRequestResource;
 import nrg.inc.synhubbackend.requests.interfaces.rest.resources.RequestResource;
+import nrg.inc.synhubbackend.requests.interfaces.rest.resources.UpdateRequestStatusResource;
 import nrg.inc.synhubbackend.requests.interfaces.rest.transform.CreateRequestCommandFromResourceAssembler;
 import nrg.inc.synhubbackend.requests.interfaces.rest.transform.RequestResourceFromEntityAssembler;
 import nrg.inc.synhubbackend.requests.interfaces.rest.transform.UpdateRequestCommandFromResourceAssembler;
@@ -66,9 +67,9 @@ public class RequestController {
         }
     }
 
-    @PutMapping("/{requestId}")
-    public ResponseEntity<RequestResource> updateRequest(@PathVariable Long requestId, @RequestBody RequestResource resource) {
-            var updateRequestCommand = UpdateRequestCommandFromResourceAssembler.toCommandFromResource(requestId, resource);
+    @PutMapping("/{requestId}/status")
+    public ResponseEntity<RequestResource> updateRequest(@PathVariable Long requestId, @RequestBody UpdateRequestStatusResource resource) {
+            var updateRequestCommand = UpdateRequestCommandFromResourceAssembler.toCommandFromResource(requestId, resource.requestStatus());
             var optionalRequest = this.requestCommandService.handle(updateRequestCommand);
 
         if(optionalRequest.isEmpty()) {
