@@ -1,0 +1,73 @@
+package nrg.inc.synhubbackend.groups.interfaces.rest;
+
+
+import io.swagger.v3.oas.annotations.tags.Tag;
+import nrg.inc.synhubbackend.groups.domain.model.commands.DeleteGroupCommand;
+import nrg.inc.synhubbackend.groups.domain.model.commands.UpdateGroupCommand;
+import nrg.inc.synhubbackend.groups.domain.model.queries.GetGroupByIdQuery;
+import nrg.inc.synhubbackend.groups.domain.services.GroupCommandService;
+import nrg.inc.synhubbackend.groups.domain.services.GroupQueryService;
+import nrg.inc.synhubbackend.groups.interfaces.rest.resources.GroupResource;
+import nrg.inc.synhubbackend.groups.interfaces.rest.transform.GroupResourceFromEntityAssembler;
+import nrg.inc.synhubbackend.shared.interfaces.rest.resources.MessageResource;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping(value = "/api/v1/groups")
+@Tag(name = "Task", description = "Task management API")
+public class GroupController {
+
+    private final GroupQueryService groupQueryService;
+    private final GroupCommandService groupCommandService;
+
+    public GroupController(GroupQueryService groupQueryService, GroupCommandService groupCommandService) {
+        this.groupQueryService = groupQueryService;
+        this.groupCommandService = groupCommandService;
+    }
+
+
+    @GetMapping("/{groupId}")
+    public ResponseEntity<GroupResource> getGroupById(@PathVariable Long groupId) {
+        var getGroupByIdQuery = new GetGroupByIdQuery(groupId);
+        var group = this.groupQueryService.handle(getGroupByIdQuery);
+
+        if (group.isEmpty()) return ResponseEntity.notFound().build();
+
+        var groupResource = GroupResourceFromEntityAssembler.toResourceFromEntity(group.get());
+        return ResponseEntity.ok(groupResource);
+    }
+
+    @DeleteMapping("/{groupId}")
+    public ResponseEntity<MessageResource> deleteGroup(@PathVariable Long groupId) {
+
+        var getGroupByIdQuery = new GetGroupByIdQuery(groupId);
+
+        var deleteGroupCommand = new DeleteGroupCommand(groupId);
+        this.groupCommandService.handle(deleteGroupCommand);
+
+        var group = this.groupQueryService.handle(getGroupByIdQuery);
+
+        if (group.isPresent()) {
+            throw new IllegalArgumentException("Group found");
+        }
+
+        return ResponseEntity.ok(new MessageResource("Group deleted successfully"));
+    }
+
+    @PutMapping("/{groupId}")
+    public ResponseEntity<GroupResource> updateGroup(@PathVariable Long groupId, @RequestBody GroupResource groupResource) {
+        var updateGroupCommand = new UpdateGroupCommand(
+                groupId,
+                groupResource.name(),
+                groupResource.imgUrl()
+        );
+        var group = this.groupCommandService.handle(updateGroupCommand);
+
+        if (group.isEmpty()) return ResponseEntity.notFound().build();
+
+        var groupResourceUpdated = GroupResourceFromEntityAssembler.toResourceFromEntity(group.get());
+        return ResponseEntity.ok(groupResourceUpdated);
+    }
+
+}

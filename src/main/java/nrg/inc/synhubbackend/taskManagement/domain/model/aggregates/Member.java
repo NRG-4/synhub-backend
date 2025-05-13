@@ -15,8 +15,7 @@ public class Member extends AuditableAbstractAggregateRoot<Member> {
 
     private String name;
 
-    @ManyToOne
-    @JoinColumn(name = "group_id")
+    @ManyToOne(cascade = {jakarta.persistence.CascadeType.ALL})
     private Group group;
 
     public Member() {}

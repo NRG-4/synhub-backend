@@ -1,7 +1,7 @@
 package nrg.inc.synhubbackend.groups.domain.model.commands;
 
 public record UpdateGroupCommand(
-        String groupId,
+        Long groupId,
         String name,
         String imgUrl
 ) {

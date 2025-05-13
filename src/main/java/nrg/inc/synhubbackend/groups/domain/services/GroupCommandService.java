@@ -9,5 +9,5 @@ import java.util.Optional;
 public interface GroupCommandService {
     Optional<Group> handle(CreateGroupCommand command);
     Optional<Group> handle(UpdateGroupCommand command);
-    Boolean handle(DeleteGroupCommand command);
+    void handle(DeleteGroupCommand command);
 }
