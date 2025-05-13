@@ -39,7 +39,7 @@ public class RequestCommandServiceImpl implements RequestCommandService {
         }
 
         var requestToUpdate = this.requestRepository.findById(requestId).get();
-        requestToUpdate.updateRequestStatus(command.status());
+        requestToUpdate.updateRequestStatus(command.requestStatus());
 
         try {
             var updatedRequest = this.requestRepository.save(requestToUpdate);
