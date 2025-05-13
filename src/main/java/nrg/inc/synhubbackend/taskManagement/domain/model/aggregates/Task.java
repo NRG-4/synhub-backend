@@ -6,7 +6,7 @@ import lombok.NonNull;
 import lombok.Setter;
 import nrg.inc.synhubbackend.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import nrg.inc.synhubbackend.taskManagement.domain.model.commands.CreateTaskCommand;
-import nrg.inc.synhubbackend.taskManagement.domain.model.valueobjects.Task_Status;
+import nrg.inc.synhubbackend.taskManagement.domain.model.valueobjects.TaskStatus;
 
 import java.security.Timestamp;
 import java.util.Date;
@@ -21,7 +21,7 @@ public class Task extends AuditableAbstractAggregateRoot<Task> {
     private String description;
 
     @Enumerated(EnumType.STRING)
-    private Task_Status status;
+    private TaskStatus status;
 
     @NonNull
     private Date dueDate;
@@ -38,14 +38,14 @@ public class Task extends AuditableAbstractAggregateRoot<Task> {
     private Timestamp time_passed;
 
     public Task() {
-        this.status = Task_Status.IN_PROGRESS;
+        this.status = TaskStatus.IN_PROGRESS;
         this.createdOn = new Date();
     }
 
     public Task(CreateTaskCommand command) {
         this.title = command.title();
         this.description = command.description();
-        this.status = Task_Status.IN_PROGRESS;
+        this.status = TaskStatus.IN_PROGRESS;
         this.dueDate = command.dueDate();
         this.createdOn = new Date();
     }

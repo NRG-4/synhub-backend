@@ -14,12 +14,12 @@ public interface MemberQueryService {
      * @param memberId the ID of the member to retrieve
      * @return the member with the specified ID
      */
-    Optional<Member> handle(GetMemberByIdQuery memberId);
+    Optional<Member> handle(GetMemberByIdQuery v);
 
     /**
      * Retrieves all members.
      *
      * @return a list of all members
      */
-    List<Member> handle(GetAllMembersQuery membersQuery);
+    List<Member> handle(GetAllMembersQuery query);
 }

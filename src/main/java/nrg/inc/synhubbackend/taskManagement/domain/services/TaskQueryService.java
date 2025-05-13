@@ -3,7 +3,7 @@ package nrg.inc.synhubbackend.taskManagement.domain.services;
 import nrg.inc.synhubbackend.taskManagement.domain.model.aggregates.Task;
 import nrg.inc.synhubbackend.taskManagement.domain.model.queries.GetAllTasksQuery;
 import nrg.inc.synhubbackend.taskManagement.domain.model.queries.GetTaskByIdQuery;
-import nrg.inc.synhubbackend.taskManagement.domain.model.queries.GetTasksByMemberId;
+import nrg.inc.synhubbackend.taskManagement.domain.model.queries.GetAllTasksByMemberId;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,22 +11,22 @@ import java.util.Optional;
 public interface TaskQueryService {
     /**
      * Retrieves all tasks.
-     * @param getAllTasksQuery
+     * @param query
      * @return
      */
-    List<Task> handle(GetAllTasksQuery getAllTasksQuery);
+    List<Task> handle(GetAllTasksQuery query);
 
     /**
      * Retrieves tasks assigned to a specific member.
-     * @param getTaskByIdQuery
+     * @param query
      * @return
      */
-    Optional<Task> handle(GetTaskByIdQuery getTaskByIdQuery);
+    Optional<Task> handle(GetTaskByIdQuery query);
 
     /**
      * Retrieves tasks assigned to a specific member.
-     * @param getTasksByMemberId
+     * @param query
      * @return
      */
-    Optional<Task> handle(GetTasksByMemberId getTasksByMemberId);
+    List<Task> handle(GetAllTasksByMemberId query);
 }
