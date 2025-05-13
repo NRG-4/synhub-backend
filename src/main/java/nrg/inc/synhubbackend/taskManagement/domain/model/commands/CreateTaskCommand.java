@@ -1,10 +1,11 @@
 package nrg.inc.synhubbackend.taskManagement.domain.model.commands;
 
+import java.util.Date;
+
 public record CreateTaskCommand(
         String title,
         String description,
-        String status,
-        String dueDate,
+        Date dueDate,
         Long memberId
 ) {
 }
