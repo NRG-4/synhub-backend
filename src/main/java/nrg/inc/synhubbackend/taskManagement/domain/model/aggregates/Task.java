@@ -30,7 +30,7 @@ public class Task extends AuditableAbstractAggregateRoot<Task> {
     private Date dueDate;
 
     @Setter
-    @OneToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "member_id")
     private Member member;
 
