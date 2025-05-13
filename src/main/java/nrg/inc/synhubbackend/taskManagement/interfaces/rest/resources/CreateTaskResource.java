@@ -5,7 +5,6 @@ import java.util.Date;
 public record CreateTaskResource(
         String title,
         String description,
-        Date dueDate,
-        Long memberId
+        Date dueDate
 ) {
 }

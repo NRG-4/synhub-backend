@@ -4,12 +4,12 @@ import nrg.inc.synhubbackend.taskManagement.domain.model.commands.CreateTaskComm
 import nrg.inc.synhubbackend.taskManagement.interfaces.rest.resources.CreateTaskResource;
 
 public class CreateTaskCommandFromResourceAssembler {
-    public static CreateTaskCommand toCommandFromResource(CreateTaskResource resource) {
+    public static CreateTaskCommand toCommandFromResource(CreateTaskResource resource, Long memberId) {
         return new CreateTaskCommand(
                 resource.title(),
                 resource.description(),
                 resource.dueDate(),
-                resource.memberId()
+                memberId
         );
     }
 }
