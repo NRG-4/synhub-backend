@@ -34,11 +34,11 @@ public class Task extends AuditableAbstractAggregateRoot<Task> {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @NonNull
-    private Integer timesRearranged;
+    @Column(nullable = false)
+    private Integer timesRearranged = 0;
 
-    @NonNull
-    private Long timePassed;
+    @Column(nullable = false)
+    private Long timePassed = 0L;
 
     public Task() {
         this.status = TaskStatus.IN_PROGRESS;
@@ -49,28 +49,31 @@ public class Task extends AuditableAbstractAggregateRoot<Task> {
         this.title = command.title();
         this.description = command.description();
         this.dueDate = command.dueDate();
+        this.status = TaskStatus.IN_PROGRESS;
     }
 
     public void updateStatus(UpdateTaskStatusCommand command) {
-        if(this.status == TaskStatus.IN_PROGRESS && command.status() == TaskStatus.COMPLETED.toString()) {
+
+        var commandStatus = TaskStatus.valueOf(command.status());
+
+        if(this.status == TaskStatus.IN_PROGRESS && commandStatus == TaskStatus.COMPLETED) {
             if(timesRearranged > 0){
                 long updatedAt = this.getUpdatedAt().getTime();
                 this.timePassed += new Date().getTime() - updatedAt;
             }else {
                 this.timePassed = new Date().getTime() - this.getCreatedAt().getTime();
             }
-
-        } else if(this.status == TaskStatus.COMPLETED && command.status() == TaskStatus.IN_PROGRESS.toString()) {
+        } else if(this.status == TaskStatus.COMPLETED && commandStatus == TaskStatus.IN_PROGRESS) {
             timesRearranged++;
         }
         this.status = TaskStatus.valueOf(command.status());
     }
 
     public void updateTask(UpdateTaskCommand command) {
-        if(command.title() != null) {
+        if(command.title() != null && command.title() != "") {
             this.title = command.title();
         }
-        if(command.description() != null) {
+        if(command.description() != null && command.description() != "") {
             this.description = command.description();
         }
         if(command.dueDate() != null) {
