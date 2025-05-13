@@ -68,7 +68,7 @@ public class RequestController {
     }
 
     @PutMapping("/{requestId}/status")
-    public ResponseEntity<RequestResource> updateRequest(@PathVariable Long requestId, @RequestBody UpdateRequestStatusResource resource) {
+    public ResponseEntity<RequestResource> updateRequestStatus(@PathVariable Long requestId, @RequestBody UpdateRequestStatusResource resource) {
             var updateRequestCommand = UpdateRequestCommandFromResourceAssembler.toCommandFromResource(requestId, resource.requestStatus());
             var optionalRequest = this.requestCommandService.handle(updateRequestCommand);
 
