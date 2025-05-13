@@ -6,7 +6,8 @@ public record UpdateTaskCommand(
         Long taskId,
         String title,
         String description,
-        Long memberId,
-        Date dueDate
+        Date dueDate,
+        Long memberId
+
 ) {
 }
