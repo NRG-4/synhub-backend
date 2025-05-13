@@ -9,6 +9,5 @@ import java.util.Optional;
 @Repository
 public interface RequestRepository extends JpaRepository<Request, Long> {
     boolean existsByTaskId(Long taskId);
-    Optional<Request> findByRequestId(Long requestId);
     Optional<Request> findByTaskId(Long taskId);
 }
