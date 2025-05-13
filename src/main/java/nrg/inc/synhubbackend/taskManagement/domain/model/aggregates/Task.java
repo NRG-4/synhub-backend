@@ -6,9 +6,12 @@ import lombok.NonNull;
 import lombok.Setter;
 import nrg.inc.synhubbackend.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import nrg.inc.synhubbackend.taskManagement.domain.model.commands.CreateTaskCommand;
+import nrg.inc.synhubbackend.taskManagement.domain.model.commands.UpdateTaskCommand;
+import nrg.inc.synhubbackend.taskManagement.domain.model.commands.UpdateTaskStatusCommand;
 import nrg.inc.synhubbackend.taskManagement.domain.model.valueobjects.TaskStatus;
 
 import java.security.Timestamp;
+import java.sql.Time;
 import java.util.Date;
 
 @Getter
@@ -32,21 +35,46 @@ public class Task extends AuditableAbstractAggregateRoot<Task> {
     private Member member;
 
     @NonNull
-    private Date createdOn;
+    private Integer timesRearranged;
 
     @NonNull
-    private Timestamp time_passed;
+    private Long timePassed;
 
     public Task() {
         this.status = TaskStatus.IN_PROGRESS;
-        this.createdOn = new Date();
+        this.timesRearranged = 0;
     }
 
     public Task(CreateTaskCommand command) {
         this.title = command.title();
         this.description = command.description();
-        this.status = TaskStatus.IN_PROGRESS;
         this.dueDate = command.dueDate();
-        this.createdOn = new Date();
+    }
+
+    public void updateStatus(UpdateTaskStatusCommand command) {
+        if(this.status == TaskStatus.IN_PROGRESS && command.status() == TaskStatus.COMPLETED.toString()) {
+            if(timesRearranged > 0){
+                long updatedAt = this.getUpdatedAt().getTime();
+                this.timePassed += new Date().getTime() - updatedAt;
+            }else {
+                this.timePassed = new Date().getTime() - this.getCreatedAt().getTime();
+            }
+
+        } else if(this.status == TaskStatus.COMPLETED && command.status() == TaskStatus.IN_PROGRESS.toString()) {
+            timesRearranged++;
+        }
+        this.status = TaskStatus.valueOf(command.status());
+    }
+
+    public void updateTask(UpdateTaskCommand command) {
+        if(command.title() != null) {
+            this.title = command.title();
+        }
+        if(command.description() != null) {
+            this.description = command.description();
+        }
+        if(command.dueDate() != null) {
+            this.dueDate = command.dueDate();
+        }
     }
 }
