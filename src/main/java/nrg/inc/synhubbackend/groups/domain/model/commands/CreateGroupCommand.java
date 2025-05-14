@@ -1,0 +1,8 @@
+package nrg.inc.synhubbackend.groups.domain.model.commands;
+
+public record CreateGroupCommand(
+        String name,
+        String imgUrl,
+        Long leaderId
+) {
+}
