@@ -33,6 +33,7 @@ public class RequestController {
     }
 
     @PostMapping
+    @Operation(summary = "Create a new request", description = "Creates a new request for a task")
     public ResponseEntity<RequestResource> createRequest(@PathVariable Long memberId, @PathVariable Long taskId, @RequestBody CreateRequestResource resource) {
         try {
             RequestType.fromString(resource.requestType());
@@ -55,6 +56,7 @@ public class RequestController {
     }
 
     @GetMapping("/{requestId}")
+    @Operation(summary = "Get request by ID", description = "Retrieves a request by its ID")
     public ResponseEntity<RequestResource> getRequestById(@PathVariable Long memberId, @PathVariable Long taskId, @PathVariable Long requestId) {
         var getRequestByIdQuery = new GetRequestByIdQuery(requestId);
         var optionalRequest = this.requestQueryService.handle(getRequestByIdQuery);
@@ -67,9 +69,10 @@ public class RequestController {
         }
     }
 
-    @PutMapping("/{requestId}/status")
-    public ResponseEntity<RequestResource> updateRequestStatus(@PathVariable Long memberId, @PathVariable Long taskId, @PathVariable Long requestId, @PathVariable UpdateRequestStatusResource resource) {
-            var updateRequestCommand = UpdateRequestCommandFromResourceAssembler.toCommandFromResource(requestId, resource.requestStatus());
+    @PutMapping("/{requestId}/status/{requestStatus}")
+    @Operation(summary = "Update request status", description = "Updates the status of a request")
+    public ResponseEntity<RequestResource> updateRequestStatus(@PathVariable Long memberId, @PathVariable Long taskId, @PathVariable Long requestId, @PathVariable String requestStatus) {
+            var updateRequestCommand = UpdateRequestCommandFromResourceAssembler.toCommandFromResource(requestId, requestStatus);
             var optionalRequest = this.requestCommandService.handle(updateRequestCommand);
 
         if(optionalRequest.isEmpty()) {
