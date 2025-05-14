@@ -11,6 +11,7 @@ import nrg.inc.synhubbackend.groups.domain.services.GroupCommandService;
 import nrg.inc.synhubbackend.groups.domain.services.GroupQueryService;
 import nrg.inc.synhubbackend.groups.interfaces.rest.resources.CreateGroupResource;
 import nrg.inc.synhubbackend.groups.interfaces.rest.resources.GroupResource;
+import nrg.inc.synhubbackend.groups.interfaces.rest.resources.UpdateGroupResource;
 import nrg.inc.synhubbackend.groups.interfaces.rest.transform.GroupResourceFromEntityAssembler;
 import nrg.inc.synhubbackend.shared.interfaces.rest.resources.MessageResource;
 import org.springframework.http.ResponseEntity;
@@ -62,7 +63,7 @@ public class GroupController {
 
     @PutMapping("/{groupId}")
     @Operation(summary = "Update a group", description = "Updates a group")
-    public ResponseEntity<GroupResource> updateGroup(@PathVariable Long groupId, @RequestBody GroupResource groupResource) {
+    public ResponseEntity<GroupResource> updateGroup(@PathVariable Long groupId, @RequestBody UpdateGroupResource groupResource) {
         var updateGroupCommand = new UpdateGroupCommand(
                 groupId,
                 groupResource.name(),
@@ -76,13 +77,13 @@ public class GroupController {
         return ResponseEntity.ok(groupResourceUpdated);
     }
 
-    @PostMapping
+    @PostMapping("/{leaderId}")
     @Operation(summary = "Create a new group", description = "Creates a new group")
-    public ResponseEntity<GroupResource> createGroup(@RequestBody CreateGroupResource createGroupResource) {
+    public ResponseEntity<GroupResource> createGroup(@RequestBody CreateGroupResource createGroupResource, @PathVariable Long leaderId) {
         var createGroupCommand = new CreateGroupCommand(
                 createGroupResource.name(),
                 createGroupResource.imgUrl(),
-                createGroupResource.leaderId()
+                leaderId
         );
         var group = this.groupCommandService.handle(createGroupCommand);
 

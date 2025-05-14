@@ -1,6 +1,6 @@
 package nrg.inc.synhubbackend.groups.interfaces.rest.resources;
 
-public record CreateGroupResource(
+public record UpdateGroupResource(
         String name,
         String imgUrl
 ) {
