@@ -3,6 +3,7 @@ package nrg.inc.synhubbackend.taskManagement.interfaces.rest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import nrg.inc.synhubbackend.taskManagement.domain.model.commands.AddGroupToMemberCommand;
 import nrg.inc.synhubbackend.taskManagement.domain.model.queries.GetAllMembersQuery;
 import nrg.inc.synhubbackend.taskManagement.domain.model.queries.GetMemberByIdQuery;
 import nrg.inc.synhubbackend.taskManagement.domain.model.queries.GetMembersByGroupIdQuery;
@@ -80,6 +81,20 @@ public class MemberController {
                 .map(MemberResourceFromEntityAssembler::toResourceFromEntity)
                 .toList();
         return ResponseEntity.ok(memberResources);
+    }
+
+    @PostMapping("/group/{groupId}/member/{memberId}")
+    @Operation(summary = "Add a group to a member", description = "Add a group to a member")
+    public ResponseEntity<MemberResource> addGroupToMember(@PathVariable Long groupId, @PathVariable Long memberId) {
+        var addGroupToMemberCommand = new AddGroupToMemberCommand(groupId, memberId);
+        var member = memberCommandService.handle(addGroupToMemberCommand);
+
+        if(member.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        var memberResource = MemberResourceFromEntityAssembler.toResourceFromEntity(member.get());
+        return ResponseEntity.ok(memberResource);
     }
 
 }
