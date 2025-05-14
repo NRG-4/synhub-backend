@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import nrg.inc.synhubbackend.taskManagement.domain.model.queries.GetAllMembersQuery;
 import nrg.inc.synhubbackend.taskManagement.domain.model.queries.GetMemberByIdQuery;
+import nrg.inc.synhubbackend.taskManagement.domain.model.queries.GetMembersByGroupIdQuery;
 import nrg.inc.synhubbackend.taskManagement.domain.services.MemberCommandService;
 import nrg.inc.synhubbackend.taskManagement.domain.services.MemberQueryService;
 import nrg.inc.synhubbackend.taskManagement.interfaces.rest.resources.CreateMemberResource;
@@ -69,4 +70,16 @@ public class MemberController {
         var memberResource = MemberResourceFromEntityAssembler.toResourceFromEntity(member.get());
         return ResponseEntity.ok(memberResource);
     }
+
+    @GetMapping("/group/{groupId}")
+    @Operation(summary = "Get members by group id", description = "Get members by group id")
+    public ResponseEntity<List<MemberResource>> getMembersByGroupId(@PathVariable Long groupId) {
+        var getMembersByGroupIdQuery = new GetMembersByGroupIdQuery(groupId);
+        var members = memberQueryService.handle(getMembersByGroupIdQuery);
+        var memberResources = members.stream()
+                .map(MemberResourceFromEntityAssembler::toResourceFromEntity)
+                .toList();
+        return ResponseEntity.ok(memberResources);
+    }
+
 }
