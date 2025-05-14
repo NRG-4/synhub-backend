@@ -8,7 +8,8 @@ public record TaskResource(
         String title,
         String description,
         String dueDate,
-        String createdOn,
+        String createdAt,
+        String updatedAt,
         String status,
         TaskMemberResource member
 ) {

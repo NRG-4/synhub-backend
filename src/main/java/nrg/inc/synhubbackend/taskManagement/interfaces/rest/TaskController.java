@@ -3,6 +3,8 @@ package nrg.inc.synhubbackend.taskManagement.interfaces.rest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import nrg.inc.synhubbackend.taskManagement.domain.model.commands.DeleteTaskCommand;
+import nrg.inc.synhubbackend.taskManagement.domain.model.commands.UpdateTaskStatusCommand;
 import nrg.inc.synhubbackend.taskManagement.domain.model.queries.GetAllTaskByStatusQuery;
 import nrg.inc.synhubbackend.taskManagement.domain.model.queries.GetAllTasksQuery;
 import nrg.inc.synhubbackend.taskManagement.domain.model.queries.GetTaskByIdQuery;
@@ -10,8 +12,10 @@ import nrg.inc.synhubbackend.taskManagement.domain.services.TaskCommandService;
 import nrg.inc.synhubbackend.taskManagement.domain.services.TaskQueryService;
 import nrg.inc.synhubbackend.taskManagement.interfaces.rest.resources.CreateTaskResource;
 import nrg.inc.synhubbackend.taskManagement.interfaces.rest.resources.TaskResource;
+import nrg.inc.synhubbackend.taskManagement.interfaces.rest.resources.UpdateTaskResource;
 import nrg.inc.synhubbackend.taskManagement.interfaces.rest.transform.CreateTaskCommandFromResourceAssembler;
 import nrg.inc.synhubbackend.taskManagement.interfaces.rest.transform.TaskResourceFromEntityAssembler;
+import nrg.inc.synhubbackend.taskManagement.interfaces.rest.transform.UpdateTaskCommandFromResourceAssembler;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,9 +30,11 @@ import java.util.stream.Collectors;
 public class TaskController {
 
     private final TaskQueryService taskQueryService;
+    private final TaskCommandService taskCommandService;
 
-    public TaskController(TaskQueryService taskQueryService) {
+    public TaskController(TaskQueryService taskQueryService, TaskCommandService taskCommandService) {
         this.taskQueryService = taskQueryService;
+        this.taskCommandService = taskCommandService;
     }
 
     @GetMapping("/{taskId}")
@@ -64,5 +70,37 @@ public class TaskController {
                 .map(TaskResourceFromEntityAssembler::toResourceFromEntity)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(taskResources);
+    }
+
+    @PutMapping("/{taskId}/status/{status}")
+    @Operation(summary = "Update task status", description = "Update task status")
+    public ResponseEntity<TaskResource> updateTaskStatus(@PathVariable Long taskId, @PathVariable String status) {
+        var updateTaskStatusCommand = new UpdateTaskStatusCommand(taskId, status);
+        var task = this.taskCommandService.handle(updateTaskStatusCommand);
+
+        if (task.isEmpty()) return ResponseEntity.badRequest().build();
+
+        var taskResource = TaskResourceFromEntityAssembler.toResourceFromEntity(task.get());
+        return ResponseEntity.ok(taskResource);
+    }
+
+    @PutMapping("/{taskId}")
+    @Operation(summary = "Update task", description = "Update task")
+    public ResponseEntity<TaskResource> updateTask(@PathVariable Long taskId, @RequestBody UpdateTaskResource resource) {
+        var updateTaskCommand = UpdateTaskCommandFromResourceAssembler.toCommandFromResource(resource, taskId);
+        var task = taskCommandService.handle(updateTaskCommand);
+
+        if (task.isEmpty()) return ResponseEntity.badRequest().build();
+
+        var taskResource = TaskResourceFromEntityAssembler.toResourceFromEntity(task.get());
+        return ResponseEntity.ok(taskResource);
+    }
+
+    @DeleteMapping("/{taskId}")
+    @Operation(summary = "Delete a task by id", description = "Delete a task by id")
+    public ResponseEntity<Void> deleteTask(@PathVariable Long taskId) {
+        var deleteTaskCommand = new DeleteTaskCommand(taskId);
+        this.taskCommandService.handle(deleteTaskCommand);
+        return ResponseEntity.noContent().build();
     }
 }

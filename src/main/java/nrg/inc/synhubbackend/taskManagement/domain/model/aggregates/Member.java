@@ -9,6 +9,8 @@ import nrg.inc.synhubbackend.groups.domain.model.aggregates.Group;
 import nrg.inc.synhubbackend.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import nrg.inc.synhubbackend.taskManagement.domain.model.commands.CreateMemberCommand;
 
+import java.util.List;
+
 @Getter
 @Entity
 public class Member extends AuditableAbstractAggregateRoot<Member> {
@@ -17,7 +19,9 @@ public class Member extends AuditableAbstractAggregateRoot<Member> {
 
     @ManyToOne(cascade = {jakarta.persistence.CascadeType.ALL})
     private Group group;
-
+    @OneToMany(mappedBy = "member")
+    private List<Task> tasks;
+  
     public Member() {}
 
     public Member(CreateMemberCommand command) {
