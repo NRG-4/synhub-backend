@@ -20,6 +20,10 @@ public class Group extends AuditableAbstractAggregateRoot<Group> {
     @NotNull
     private String name;
 
+    @NotNull
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
     @Embedded
     private ImgUrl imgUrl;
 
@@ -27,10 +31,11 @@ public class Group extends AuditableAbstractAggregateRoot<Group> {
     @JoinColumn(name = "leader_id")
     private Leader leader;
 
-    public Group(String name, String imgUrl , Leader leader) {
+    public Group(String name, String imgUrl , Leader leader, String description) {
         this.name = name;
         this.imgUrl = new ImgUrl(imgUrl);
         this.leader = leader;
+        this.description = description;
     }
 
 

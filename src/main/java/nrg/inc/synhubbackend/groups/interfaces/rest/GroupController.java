@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(value = "/api/v1/groups")
-@Tag(name = "Task", description = "Task management API")
+@Tag(name = "Groups", description = "Group management API")
 public class GroupController {
 
     private final GroupQueryService groupQueryService;
@@ -67,6 +67,7 @@ public class GroupController {
         var updateGroupCommand = new UpdateGroupCommand(
                 groupId,
                 groupResource.name(),
+                groupResource.description(),
                 groupResource.imgUrl()
         );
         var group = this.groupCommandService.handle(updateGroupCommand);
@@ -83,6 +84,7 @@ public class GroupController {
         var createGroupCommand = new CreateGroupCommand(
                 createGroupResource.name(),
                 createGroupResource.imgUrl(),
+                createGroupResource.description(),
                 leaderId
         );
         var group = this.groupCommandService.handle(createGroupCommand);
