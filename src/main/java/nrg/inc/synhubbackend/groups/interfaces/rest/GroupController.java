@@ -1,6 +1,7 @@
 package nrg.inc.synhubbackend.groups.interfaces.rest;
 
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import nrg.inc.synhubbackend.groups.domain.model.commands.CreateGroupCommand;
 import nrg.inc.synhubbackend.groups.domain.model.commands.DeleteGroupCommand;
@@ -30,6 +31,7 @@ public class GroupController {
 
 
     @GetMapping("/{groupId}")
+    @Operation(summary = "Get a group by ID", description = "Gets a group by ID")
     public ResponseEntity<GroupResource> getGroupById(@PathVariable Long groupId) {
         var getGroupByIdQuery = new GetGroupByIdQuery(groupId);
         var group = this.groupQueryService.handle(getGroupByIdQuery);
@@ -41,6 +43,7 @@ public class GroupController {
     }
 
     @DeleteMapping("/{groupId}")
+    @Operation(summary = "Delete a group", description = "Deletes a group")
     public ResponseEntity<MessageResource> deleteGroup(@PathVariable Long groupId) {
 
         var getGroupByIdQuery = new GetGroupByIdQuery(groupId);
@@ -58,6 +61,7 @@ public class GroupController {
     }
 
     @PutMapping("/{groupId}")
+    @Operation(summary = "Update a group", description = "Updates a group")
     public ResponseEntity<GroupResource> updateGroup(@PathVariable Long groupId, @RequestBody GroupResource groupResource) {
         var updateGroupCommand = new UpdateGroupCommand(
                 groupId,
@@ -73,6 +77,7 @@ public class GroupController {
     }
 
     @PostMapping
+    @Operation(summary = "Create a new group", description = "Creates a new group")
     public ResponseEntity<GroupResource> createGroup(@RequestBody CreateGroupResource createGroupResource) {
         var createGroupCommand = new CreateGroupCommand(
                 createGroupResource.name(),
