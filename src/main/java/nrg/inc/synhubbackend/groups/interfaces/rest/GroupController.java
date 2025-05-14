@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(value = "/api/v1/groups")
-@Tag(name = "Task", description = "Task management API")
+@Tag(name = "Groups", description = "Group management API")
 public class GroupController {
 
     private final GroupQueryService groupQueryService;
@@ -67,6 +67,8 @@ public class GroupController {
         var updateGroupCommand = new UpdateGroupCommand(
                 groupId,
                 groupResource.name(),
+                groupResource.description(),
+                groupResource.memberCount(),
                 groupResource.imgUrl()
         );
         var group = this.groupCommandService.handle(updateGroupCommand);
@@ -83,6 +85,7 @@ public class GroupController {
         var createGroupCommand = new CreateGroupCommand(
                 createGroupResource.name(),
                 createGroupResource.imgUrl(),
+                createGroupResource.description(),
                 leaderId
         );
         var group = this.groupCommandService.handle(createGroupCommand);
@@ -91,6 +94,18 @@ public class GroupController {
 
         var groupResourceCreated = GroupResourceFromEntityAssembler.toResourceFromEntity(group.get());
         return ResponseEntity.ok(groupResourceCreated);
+    }
+
+    @GetMapping("/leader/{leaderId}")
+    @Operation(summary = "Get a group by leader ID", description = "Gets a group by leader ID")
+    public ResponseEntity<GroupResource> getGroupByLeaderId(@PathVariable Long leaderId) {
+        var getGroupByLeaderIdQuery = new GetGroupByIdQuery(leaderId);
+        var group = this.groupQueryService.handle(getGroupByLeaderIdQuery);
+
+        if (group.isEmpty()) return ResponseEntity.notFound().build();
+
+        var groupResource = GroupResourceFromEntityAssembler.toResourceFromEntity(group.get());
+        return ResponseEntity.ok(groupResource);
     }
 
 }

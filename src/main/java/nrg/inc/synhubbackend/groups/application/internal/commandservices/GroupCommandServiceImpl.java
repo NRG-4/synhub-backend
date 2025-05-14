@@ -29,7 +29,7 @@ public class GroupCommandServiceImpl implements GroupCommandService {
     public Optional<Group> handle(CreateGroupCommand command) {
 
         Leader leader = leaderRepository.findById(command.leaderId()).get();
-        Group group = new Group(command.name(), command.imgUrl(), leader);
+        Group group = new Group(command.name(), command.imgUrl(), leader, command.description(), 0);
         groupRepository.save(group);
 
         return Optional.of(group);
@@ -46,7 +46,9 @@ public class GroupCommandServiceImpl implements GroupCommandService {
 
         Group group = groupOptional.get();
         group.setName(command.name());
+        group.setDescription(command.description());
         group.setImgUrl(new ImgUrl(command.imgUrl()));
+        group.setMemberCount(command.memberCount());
         groupRepository.save(group);
         return Optional.of(group);
     }

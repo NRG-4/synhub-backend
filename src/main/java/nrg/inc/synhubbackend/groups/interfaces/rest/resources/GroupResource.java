@@ -4,6 +4,9 @@ public record GroupResource(
         Long id,
         String name,
         String imgUrl,
+        String description,
+
+        Integer memberCount,
         String leaderName
 ) {
 }
