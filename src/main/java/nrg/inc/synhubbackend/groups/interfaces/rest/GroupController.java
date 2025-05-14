@@ -96,4 +96,16 @@ public class GroupController {
         return ResponseEntity.ok(groupResourceCreated);
     }
 
+    @GetMapping("/leader/{leaderId}")
+    @Operation(summary = "Get a group by leader ID", description = "Gets a group by leader ID")
+    public ResponseEntity<GroupResource> getGroupByLeaderId(@PathVariable Long leaderId) {
+        var getGroupByLeaderIdQuery = new GetGroupByIdQuery(leaderId);
+        var group = this.groupQueryService.handle(getGroupByLeaderIdQuery);
+
+        if (group.isEmpty()) return ResponseEntity.notFound().build();
+
+        var groupResource = GroupResourceFromEntityAssembler.toResourceFromEntity(group.get());
+        return ResponseEntity.ok(groupResource);
+    }
+
 }
