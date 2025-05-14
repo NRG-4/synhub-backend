@@ -1,9 +1,6 @@
 package nrg.inc.synhubbackend.taskManagement.domain.model.aggregates;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.Getter;
 import nrg.inc.synhubbackend.groups.domain.model.aggregates.Group;
 import nrg.inc.synhubbackend.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
@@ -17,8 +14,10 @@ public class Member extends AuditableAbstractAggregateRoot<Member> {
 
     private String name;
 
-    @ManyToOne(cascade = {jakarta.persistence.CascadeType.ALL})
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "group_id", nullable = true)
     private Group group;
+
     @OneToMany(mappedBy = "member")
     private List<Task> tasks;
   
