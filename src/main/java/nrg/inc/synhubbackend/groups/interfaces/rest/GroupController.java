@@ -68,6 +68,7 @@ public class GroupController {
                 groupId,
                 groupResource.name(),
                 groupResource.description(),
+                groupResource.memberCount(),
                 groupResource.imgUrl()
         );
         var group = this.groupCommandService.handle(updateGroupCommand);

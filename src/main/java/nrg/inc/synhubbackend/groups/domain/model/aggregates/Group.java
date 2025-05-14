@@ -31,11 +31,15 @@ public class Group extends AuditableAbstractAggregateRoot<Group> {
     @JoinColumn(name = "leader_id")
     private Leader leader;
 
-    public Group(String name, String imgUrl , Leader leader, String description) {
+    @NotNull
+    private Integer memberCount;
+
+    public Group(String name, String imgUrl , Leader leader, String description, Integer memberCount) {
         this.name = name;
         this.imgUrl = new ImgUrl(imgUrl);
         this.leader = leader;
         this.description = description;
+        this.memberCount = memberCount;
     }
 
 

@@ -4,6 +4,8 @@ public record UpdateGroupCommand(
         Long groupId,
         String name,
         String description,
+
+        Integer memberCount,
         String imgUrl
 ) {
 }
