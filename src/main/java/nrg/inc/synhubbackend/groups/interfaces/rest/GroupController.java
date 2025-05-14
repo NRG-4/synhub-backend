@@ -2,11 +2,13 @@ package nrg.inc.synhubbackend.groups.interfaces.rest;
 
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import nrg.inc.synhubbackend.groups.domain.model.commands.CreateGroupCommand;
 import nrg.inc.synhubbackend.groups.domain.model.commands.DeleteGroupCommand;
 import nrg.inc.synhubbackend.groups.domain.model.commands.UpdateGroupCommand;
 import nrg.inc.synhubbackend.groups.domain.model.queries.GetGroupByIdQuery;
 import nrg.inc.synhubbackend.groups.domain.services.GroupCommandService;
 import nrg.inc.synhubbackend.groups.domain.services.GroupQueryService;
+import nrg.inc.synhubbackend.groups.interfaces.rest.resources.CreateGroupResource;
 import nrg.inc.synhubbackend.groups.interfaces.rest.resources.GroupResource;
 import nrg.inc.synhubbackend.groups.interfaces.rest.transform.GroupResourceFromEntityAssembler;
 import nrg.inc.synhubbackend.shared.interfaces.rest.resources.MessageResource;
@@ -68,6 +70,21 @@ public class GroupController {
 
         var groupResourceUpdated = GroupResourceFromEntityAssembler.toResourceFromEntity(group.get());
         return ResponseEntity.ok(groupResourceUpdated);
+    }
+
+    @PostMapping
+    public ResponseEntity<GroupResource> createGroup(@RequestBody CreateGroupResource createGroupResource) {
+        var createGroupCommand = new CreateGroupCommand(
+                createGroupResource.name(),
+                createGroupResource.imgUrl(),
+                createGroupResource.leaderId()
+        );
+        var group = this.groupCommandService.handle(createGroupCommand);
+
+        if (group.isEmpty()) return ResponseEntity.notFound().build();
+
+        var groupResourceCreated = GroupResourceFromEntityAssembler.toResourceFromEntity(group.get());
+        return ResponseEntity.ok(groupResourceCreated);
     }
 
 }
