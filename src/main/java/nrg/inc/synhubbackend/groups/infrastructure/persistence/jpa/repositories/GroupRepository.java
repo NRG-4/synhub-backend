@@ -1,0 +1,10 @@
+package nrg.inc.synhubbackend.groups.infrastructure.persistence.jpa.repositories;
+
+import nrg.inc.synhubbackend.groups.domain.model.aggregates.Group;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface GroupRepository extends JpaRepository<Group, Long> {
+    
+}
