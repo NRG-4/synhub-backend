@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST})
 @RestController
-@RequestMapping(value = "/api/v1/requests", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/api/v1/{memberId}/tasks/{taskId}/requests", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Request", description = "Request management API")
 public class RequestController {
 
@@ -33,7 +33,7 @@ public class RequestController {
     }
 
     @PostMapping
-    public ResponseEntity<RequestResource> createRequest(@RequestBody CreateRequestResource resource) {
+    public ResponseEntity<RequestResource> createRequest(@PathVariable Long memberId, @PathVariable Long taskId, @RequestBody CreateRequestResource resource) {
         try {
             RequestType.fromString(resource.requestType());
         } catch (IllegalArgumentException e) {
@@ -55,7 +55,7 @@ public class RequestController {
     }
 
     @GetMapping("/{requestId}")
-    public ResponseEntity<RequestResource> getRequestById(@PathVariable Long requestId) {
+    public ResponseEntity<RequestResource> getRequestById(@PathVariable Long memberId, @PathVariable Long taskId, @PathVariable Long requestId) {
         var getRequestByIdQuery = new GetRequestByIdQuery(requestId);
         var optionalRequest = this.requestQueryService.handle(getRequestByIdQuery);
 
@@ -68,7 +68,7 @@ public class RequestController {
     }
 
     @PutMapping("/{requestId}/status")
-    public ResponseEntity<RequestResource> updateRequestStatus(@PathVariable Long requestId, @RequestBody UpdateRequestStatusResource resource) {
+    public ResponseEntity<RequestResource> updateRequestStatus(@PathVariable Long memberId, @PathVariable Long taskId, @PathVariable Long requestId, @PathVariable UpdateRequestStatusResource resource) {
             var updateRequestCommand = UpdateRequestCommandFromResourceAssembler.toCommandFromResource(requestId, resource.requestStatus());
             var optionalRequest = this.requestCommandService.handle(updateRequestCommand);
 
