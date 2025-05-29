@@ -6,7 +6,7 @@ import nrg.inc.synhubbackend.taskManagement.domain.model.aggregates.Member;
 public class UserMemberResourceFromEntityAssembler {
     public static UserMemberResource toResourceFromEntity(Member member) {
         return new UserMemberResource(
-                member.getGroup().getId()
+                member.getGroup() != null ? member.getGroup().getId() : 0
         );
     }
 }

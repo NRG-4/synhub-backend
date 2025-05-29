@@ -1,17 +1,19 @@
 package nrg.inc.synhubbackend.iam.interfaces.rest;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import nrg.inc.synhubbackend.iam.domain.model.commands.CreateUserLeaderCommand;
 import nrg.inc.synhubbackend.iam.domain.model.queries.GetAllUsersQuery;
 import nrg.inc.synhubbackend.iam.domain.model.queries.GetUserByIdQuery;
+import nrg.inc.synhubbackend.iam.domain.services.UserCommandService;
 import nrg.inc.synhubbackend.iam.domain.services.UserQueryService;
 import nrg.inc.synhubbackend.iam.interfaces.rest.resources.UserResource;
+import nrg.inc.synhubbackend.iam.interfaces.rest.transform.CreateUserLeaderCommandFromResourceAssembler;
+import nrg.inc.synhubbackend.iam.interfaces.rest.transform.CreateUserMemberCommandFromResourceAssembler;
 import nrg.inc.synhubbackend.iam.interfaces.rest.transform.UserResourceFromEntityAssembler;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -27,9 +29,11 @@ import java.util.List;
 public class UsersController {
 
   private final UserQueryService userQueryService;
+  private final UserCommandService userCommandService;
 
-  public UsersController(UserQueryService userQueryService) {
+  public UsersController(UserQueryService userQueryService, UserCommandService userCommandService) {
     this.userQueryService = userQueryService;
+    this.userCommandService = userCommandService;
   }
 
   /**
@@ -62,6 +66,44 @@ public class UsersController {
     var user = userQueryService.handle(getUserByIdQuery);
     if (user.isEmpty()) {
       return ResponseEntity.notFound().build();
+    }
+    var userResource = UserResourceFromEntityAssembler.toResourceFromEntity(user.get());
+    return ResponseEntity.ok(userResource);
+  }
+
+  @PutMapping(value = "/{userId}/leader")
+  @Operation(summary = "Set user as leader", description = "Set user as leader")
+  public ResponseEntity<UserResource> setUserLeader(@PathVariable Long userId) {
+    if(this.userQueryService.handle(new GetUserByIdQuery(userId)) == null) {
+      return ResponseEntity.notFound().build();
+    }
+    var role = this.userQueryService.handle(new GetUserByIdQuery(userId)).get().getRoles().stream().findFirst().get().getName().toString();
+    if(!role.equals("ROLE_LEADER")) {
+      throw new RuntimeException("User is not a leader");
+    }
+    var createUserLeaderCommand = CreateUserLeaderCommandFromResourceAssembler.toCommandFromResource(userId);
+    var user = userCommandService.handle(createUserLeaderCommand);
+    if (user.isEmpty()) {
+      return ResponseEntity.badRequest().build();
+    }
+    var userResource = UserResourceFromEntityAssembler.toResourceFromEntity(user.get());
+    return ResponseEntity.ok(userResource);
+  }
+
+  @PutMapping(value = "/{userId}/member")
+  @Operation(summary = "Set user as member", description = "Set user as member")
+  public ResponseEntity<UserResource> setUserMember(@PathVariable Long userId) {
+    if (this.userQueryService.handle(new GetUserByIdQuery(userId)) == null) {
+      return ResponseEntity.notFound().build();
+    }
+    var role = this.userQueryService.handle(new GetUserByIdQuery(userId)).get().getRoles().stream().findFirst().get().getName().toString();
+    if (!role.equals("ROLE_MEMBER")) {
+        throw new RuntimeException("User is not a member");
+    }
+    var createMemberCommand = CreateUserMemberCommandFromResourceAssembler.toCommandFromResource(userId);
+    var user = userCommandService.handle(createMemberCommand);
+    if (user.isEmpty()) {
+      return ResponseEntity.badRequest().build();
     }
     var userResource = UserResourceFromEntityAssembler.toResourceFromEntity(user.get());
     return ResponseEntity.ok(userResource);

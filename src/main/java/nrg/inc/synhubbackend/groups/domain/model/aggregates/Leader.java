@@ -19,7 +19,7 @@ public class Leader extends AuditableAbstractAggregateRoot<Leader> {
     Integer solvedRequests;
 
     public Leader() {
-        this.averageSolutionTime = null;
+        this.averageSolutionTime = new Time(0);
         this.solvedRequests = 0;
     }
 

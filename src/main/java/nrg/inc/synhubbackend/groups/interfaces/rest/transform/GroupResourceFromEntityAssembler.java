@@ -11,7 +11,7 @@ public class GroupResourceFromEntityAssembler {
                 group.getImgUrl().imgUrl(),
                 group.getDescription(),
                 group.getMemberCount(),
-                group.getLeader().getName()
+                "d"
         );
     }
 }
