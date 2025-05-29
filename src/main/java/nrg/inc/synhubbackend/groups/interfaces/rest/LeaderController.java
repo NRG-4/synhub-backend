@@ -39,7 +39,7 @@ public class LeaderController {
     @PostMapping
     @Operation(summary = "Create a new leader", description = "Creates a new leader")
     public ResponseEntity<LeaderResource> createLeader(@RequestBody LeaderResource leaderResource) {
-        var createLeaderCommand = new CreateLeaderCommand(leaderResource.name());
+        var createLeaderCommand = new CreateLeaderCommand();
         var leader = this.leaderCommandService.handle(createLeaderCommand);
 
         var createdLeaderResource = LeaderResourceFromEntityAssembler.toResourceFromEntity(leader.get());

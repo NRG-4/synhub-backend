@@ -6,7 +6,6 @@ import nrg.inc.synhubbackend.taskManagement.interfaces.rest.resources.CreateMemb
 public class CreateMemberCommandFromResourceAssembler {
     public static CreateMemberCommand toCommandFromResource(CreateMemberResource resource) {
         return new CreateMemberCommand(
-                resource.name()
         );
     }
 }

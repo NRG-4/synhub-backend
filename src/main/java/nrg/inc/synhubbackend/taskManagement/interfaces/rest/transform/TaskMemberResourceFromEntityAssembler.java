@@ -6,8 +6,7 @@ import nrg.inc.synhubbackend.taskManagement.interfaces.rest.resources.TaskMember
 public class TaskMemberResourceFromEntityAssembler {
     public static TaskMemberResource toResourceFromEntity(Member entity) {
         return new TaskMemberResource(
-                entity.getId(),
-                entity.getName()
+                entity.getId()
         );
     }
 }

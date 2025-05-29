@@ -14,7 +14,6 @@ import java.util.List;
 @Entity
 public class Member extends AuditableAbstractAggregateRoot<Member> {
 
-    private String name;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "group_id", nullable = true)
@@ -26,6 +25,5 @@ public class Member extends AuditableAbstractAggregateRoot<Member> {
     public Member() {}
 
     public Member(CreateMemberCommand command) {
-        this.name = command.name();
     }
 }

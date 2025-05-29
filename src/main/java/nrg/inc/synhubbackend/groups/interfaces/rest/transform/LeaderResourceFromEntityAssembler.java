@@ -6,7 +6,8 @@ import nrg.inc.synhubbackend.groups.interfaces.rest.resources.LeaderResource;
 public class LeaderResourceFromEntityAssembler {
     public static LeaderResource toResourceFromEntity(Leader leader) {
         return new LeaderResource(
-                leader.getName()
+                leader.getAverageSolutionTime().toString(),
+                leader.getSolvedRequests()
         );
     }
 }

@@ -20,11 +20,9 @@ public class LeaderCommandServiceImpl implements LeaderCommandService {
 
     @Override
     public Optional<Leader> handle(CreateLeaderCommand command) {
-
-        Leader leader = new Leader(command.name());
+        Leader leader = new Leader();
         leaderRepository.save(leader);
         return Optional.of(leader);
-
     }
 }
 
