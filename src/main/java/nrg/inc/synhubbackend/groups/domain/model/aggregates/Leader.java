@@ -12,7 +12,6 @@ import java.sql.Time;
 @Entity
 @Getter
 @Setter
-@NoArgsConstructor
 public class Leader extends AuditableAbstractAggregateRoot<Leader> {
 
     Time averageSolutionTime;
