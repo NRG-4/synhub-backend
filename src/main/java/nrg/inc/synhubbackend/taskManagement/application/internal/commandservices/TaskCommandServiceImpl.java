@@ -1,4 +1,4 @@
-package nrg.inc.synhubbackend.taskManagement.application;
+package nrg.inc.synhubbackend.taskManagement.application.internal.commandservices;
 
 import nrg.inc.synhubbackend.taskManagement.domain.model.aggregates.Task;
 import nrg.inc.synhubbackend.taskManagement.domain.model.commands.CreateTaskCommand;

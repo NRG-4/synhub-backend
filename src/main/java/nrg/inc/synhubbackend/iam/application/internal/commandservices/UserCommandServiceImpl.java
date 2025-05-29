@@ -3,6 +3,8 @@ package nrg.inc.synhubbackend.iam.application.internal.commandservices;
 import nrg.inc.synhubbackend.iam.application.internal.outboundservices.hashing.HashingService;
 import nrg.inc.synhubbackend.iam.application.internal.outboundservices.tokens.TokenService;
 import nrg.inc.synhubbackend.iam.domain.model.aggregates.User;
+import nrg.inc.synhubbackend.iam.domain.model.commands.CreateUserLeaderCommand;
+import nrg.inc.synhubbackend.iam.domain.model.commands.CreateUserMemberCommand;
 import nrg.inc.synhubbackend.iam.domain.model.commands.SignInCommand;
 import nrg.inc.synhubbackend.iam.domain.model.commands.SignUpCommand;
 import nrg.inc.synhubbackend.iam.domain.services.UserCommandService;
@@ -89,4 +91,23 @@ public class UserCommandServiceImpl implements UserCommandService {
     userRepository.save(user);
     return userRepository.findByUsername(command.username());
   }
+
+  @Override
+  public Optional<User> handle(CreateUserLeaderCommand command) {
+    var userId = command.userId();
+    if(userRepository.findById(userId).isEmpty()){
+        throw new RuntimeException("User not found");
+    }
+    var user = userRepository.findById(userId).get();
+    var member =
+
+    return Optional.empty();
+  }
+
+  @Override
+  public Optional<User> handle(CreateUserMemberCommand command) {
+    return Optional.empty();
+  }
+
+
 }

@@ -1,4 +1,4 @@
-package nrg.inc.synhubbackend.taskManagement.application.acl;
+package nrg.inc.synhubbackend.taskManagement.application.internal.acl;
 
 import nrg.inc.synhubbackend.taskManagement.domain.model.aggregates.Member;
 import nrg.inc.synhubbackend.taskManagement.infrastructure.persistence.jpa.repositories.MemberRepository;

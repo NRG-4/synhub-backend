@@ -1,4 +1,4 @@
-package nrg.inc.synhubbackend.taskManagement.application;
+package nrg.inc.synhubbackend.taskManagement.application.internal.queryservices;
 
 import nrg.inc.synhubbackend.taskManagement.domain.model.aggregates.Member;
 import nrg.inc.synhubbackend.taskManagement.domain.model.queries.GetAllMembersQuery;
