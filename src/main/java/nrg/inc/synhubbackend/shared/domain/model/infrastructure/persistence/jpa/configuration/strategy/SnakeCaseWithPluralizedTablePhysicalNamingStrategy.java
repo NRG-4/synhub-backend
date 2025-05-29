@@ -1,4 +1,4 @@
-package nrg.inc.synhubbackend.shared.domain.model.strategy;
+package nrg.inc.synhubbackend.shared.domain.model.infrastructure.persistence.jpa.configuration.strategy;
 
 import org.hibernate.boot.model.naming.Identifier;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
