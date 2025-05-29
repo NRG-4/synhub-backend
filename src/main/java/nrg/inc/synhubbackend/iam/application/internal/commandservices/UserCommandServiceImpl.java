@@ -1,5 +1,7 @@
 package nrg.inc.synhubbackend.iam.application.internal.commandservices;
 
+import nrg.inc.synhubbackend.iam.application.external.outboundedservices.ExternalLeaderService;
+import nrg.inc.synhubbackend.iam.application.external.outboundedservices.ExternalMemberService;
 import nrg.inc.synhubbackend.iam.application.internal.outboundservices.hashing.HashingService;
 import nrg.inc.synhubbackend.iam.application.internal.outboundservices.tokens.TokenService;
 import nrg.inc.synhubbackend.iam.domain.model.aggregates.User;
@@ -29,14 +31,18 @@ public class UserCommandServiceImpl implements UserCommandService {
   private final HashingService hashingService;
   private final TokenService tokenService;
 
+  private final ExternalMemberService externalMemberService;
+  private final ExternalLeaderService externalLeaderService;
+
   private final RoleRepository roleRepository;
 
   public UserCommandServiceImpl(UserRepository userRepository, HashingService hashingService,
-      TokenService tokenService, RoleRepository roleRepository) {
-
+                                TokenService tokenService, ExternalMemberService externalMemberService, ExternalLeaderService externalLeaderService, RoleRepository roleRepository) {
     this.userRepository = userRepository;
     this.hashingService = hashingService;
     this.tokenService = tokenService;
+    this.externalMemberService = externalMemberService;
+    this.externalLeaderService = externalLeaderService;
     this.roleRepository = roleRepository;
   }
 
@@ -99,15 +105,32 @@ public class UserCommandServiceImpl implements UserCommandService {
         throw new RuntimeException("User not found");
     }
     var user = userRepository.findById(userId).get();
-    var member =
+    var leader = externalLeaderService.createUserLeader(command);
+    user.setLeader(leader.get());
 
-    return Optional.empty();
+    try {
+      var updatedUser = userRepository.save(user);
+      return Optional.of(updatedUser);
+    } catch (Exception e) {
+        throw new RuntimeException("Failed to create user as leader: " + e.getMessage());
+    }
   }
 
   @Override
   public Optional<User> handle(CreateUserMemberCommand command) {
-    return Optional.empty();
+    var userId = command.userId();
+    if(userRepository.findById(userId).isEmpty()){
+        throw new RuntimeException("User not found");
+    }
+    var user = userRepository.findById(userId).get();
+    var member = externalMemberService.createUserMember(command);
+    user.setMember(member.get());
+
+    try {
+      var updatedUser = userRepository.save(user);
+      return Optional.of(updatedUser);
+    } catch (Exception e) {
+        throw new RuntimeException("Failed to create user as member: " + e.getMessage());
+    }
   }
-
-
 }
