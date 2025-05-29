@@ -1,12 +1,15 @@
 package nrg.inc.synhubbackend.iam.domain.model.aggregates;
 
+import io.micrometer.common.lang.Nullable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import nrg.inc.synhubbackend.groups.domain.model.aggregates.Leader;
 import nrg.inc.synhubbackend.iam.domain.model.entities.Role;
 import nrg.inc.synhubbackend.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
+import nrg.inc.synhubbackend.taskManagement.domain.model.aggregates.Member;
 
 import java.util.HashSet;
 import java.util.List;
@@ -23,6 +26,21 @@ public class User extends AuditableAbstractAggregateRoot<User> {
     private String username;
 
     @NotBlank
+    @Size(max = 50)
+    private String name;
+
+    @NotBlank
+    @Size(max = 50)
+    private String surname;
+
+    @NotBlank
+    private String imgUrl;
+
+    @NotBlank
+    @Column(unique = true)
+    private String email;
+
+    @NotBlank
     @Size(max = 120)
     private String password;
 
@@ -33,17 +51,51 @@ public class User extends AuditableAbstractAggregateRoot<User> {
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles;
 
+    @Nullable
+    @Setter
+    @ManyToOne
+    @JoinColumn(name = "leader_id")
+    private Leader leader;
+
+    @Nullable
+    @Setter
+    @ManyToOne
+    @JoinColumn(name = "member_id")
+    private Member member;
+
     public User() {
         this.roles = new HashSet<>();
     }
-    public User(String username, String password) {
+    public User(String username,
+                String name,
+                String surname,
+                String imgUrl,
+                String email,
+                String password) {
         this.username = username;
+        this.name = name;
+        this.surname = surname;
+        this.imgUrl = imgUrl;
+        this.email = email;
         this.password = password;
         this.roles = new HashSet<>();
     }
 
-    public User(String username, String password, List<Role> roles) {
-        this(username, password);
+    public User(
+            String username,
+            String name,
+            String surname,
+            String imgUrl,
+            String email,
+            String password,
+            List<Role> roles) {
+        this(
+                username,
+                name,
+                surname,
+                imgUrl,
+                email,
+                password);
         addRoles(roles);
     }
 

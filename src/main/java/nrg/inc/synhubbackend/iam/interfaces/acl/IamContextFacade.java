@@ -38,8 +38,15 @@ public class IamContextFacade {
    * @param password The password of the user.
    * @return The id of the created user.
    */
-  public Long createUser(String username, String password) {
-    var signUpCommand = new SignUpCommand(username, password, List.of(Role.getDefaultRole()));
+  public Long createUser(String username, String name, String surname, String imgUrl, String email, String password) {
+    var signUpCommand = new SignUpCommand(
+            username,
+            name,
+            surname,
+            imgUrl,
+            email,
+            password,
+            List.of(Role.getDefaultRole()));
     var result = userCommandService.handle(signUpCommand);
     if (result.isEmpty()) return 0L;
     return result.get().getId();
@@ -53,11 +60,18 @@ public class IamContextFacade {
    *                  it is ignored.
    * @return The id of the created user.
    */
-  public Long createUser(String username, String password, List<String> roleNames) {
+  public Long createUser(String username, String name, String surname, String imgUrl, String email, String password, List<String> roleNames) {
     var roles = roleNames != null
         ? roleNames.stream().map(Role::toRoleFromName).toList()
         : new ArrayList<Role>();
-    var signUpCommand = new SignUpCommand(username, password, roles);
+    var signUpCommand = new SignUpCommand(
+            username,
+            name,
+            surname,
+            imgUrl,
+            email,
+            password,
+            roles);
     var result = userCommandService.handle(signUpCommand);
     if (result.isEmpty())
       return 0L;
