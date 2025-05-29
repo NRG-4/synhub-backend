@@ -4,9 +4,11 @@ import nrg.inc.synhubbackend.iam.domain.model.commands.CreateUserMemberCommand;
 import nrg.inc.synhubbackend.taskManagement.domain.model.aggregates.Member;
 import nrg.inc.synhubbackend.taskManagement.interfaces.rest.MemberController;
 import nrg.inc.synhubbackend.taskManagement.interfaces.rest.acl.MemberContextFacade;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+@Service
 public class ExternalMemberService {
     private final MemberContextFacade memberContextFacade;
 
