@@ -1,9 +1,7 @@
 package nrg.inc.synhubbackend.iam.application.internal.queryservices;
 
 import nrg.inc.synhubbackend.iam.domain.model.aggregates.User;
-import nrg.inc.synhubbackend.iam.domain.model.queries.GetAllUsersQuery;
-import nrg.inc.synhubbackend.iam.domain.model.queries.GetUserByIdQuery;
-import nrg.inc.synhubbackend.iam.domain.model.queries.GetUserByUsernameQuery;
+import nrg.inc.synhubbackend.iam.domain.model.queries.*;
 import nrg.inc.synhubbackend.iam.domain.services.UserQueryService;
 import nrg.inc.synhubbackend.iam.infrastructure.persistence.jpa.repositories.UserRepository;
 import org.springframework.stereotype.Service;
@@ -58,5 +56,27 @@ public class UserQueryServiceImpl implements UserQueryService {
   @Override
   public Optional<User> handle(GetUserByUsernameQuery query) {
     return userRepository.findByUsername(query.username());
+  }
+
+  /**
+   * This method is used to handle {@link GetUserByMemberId} query.
+   * @param query {@link GetUserByMemberId} instance.
+   * @return {@link Optional} of {@link User} instance.
+   * @see GetUserByMemberId
+   */
+  @Override
+  public Optional<User> handle(GetUserByMemberId query) {
+    return userRepository.findByMember_Id(query.memberId());
+  }
+
+  /**
+   * This method is used to handle {@link GetUserByLeaderId} query.
+   * @param query {@link GetUserByLeaderId} instance.
+   * @return {@link Optional} of {@link User} instance.
+   * @see GetUserByLeaderId
+   */
+  @Override
+  public Optional<User> handle(GetUserByLeaderId query) {
+    return userRepository.findByLeader_Id(query.leaderId());
   }
 }
