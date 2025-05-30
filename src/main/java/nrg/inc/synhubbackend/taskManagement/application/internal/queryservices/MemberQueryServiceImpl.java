@@ -1,5 +1,7 @@
 package nrg.inc.synhubbackend.taskManagement.application.internal.queryservices;
 
+import nrg.inc.synhubbackend.iam.domain.model.aggregates.User;
+import nrg.inc.synhubbackend.taskManagement.application.external.outboundedservices.ExternalIamService;
 import nrg.inc.synhubbackend.taskManagement.domain.model.aggregates.Member;
 import nrg.inc.synhubbackend.taskManagement.domain.model.queries.GetAllMembersQuery;
 import nrg.inc.synhubbackend.taskManagement.domain.model.queries.GetMemberByIdQuery;
@@ -15,14 +17,16 @@ import java.util.Optional;
 public class MemberQueryServiceImpl implements MemberQueryService {
 
     private final MemberRepository memberRepository;
+    private final ExternalIamService externalIamService;
 
-    public MemberQueryServiceImpl(MemberRepository memberRepository) {
+    public MemberQueryServiceImpl(MemberRepository memberRepository, ExternalIamService externalIamService) {
         this.memberRepository = memberRepository;
+        this.externalIamService = externalIamService;
     }
 
     @Override
-    public Optional<Member> handle(GetMemberByIdQuery query) {
-        return this.memberRepository.findById(query.memberId());
+    public Optional<User> handle(GetMemberByIdQuery query) {
+        return this.externalIamService.getUserByMemberId(query.memberId());
     }
 
     @Override

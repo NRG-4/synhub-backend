@@ -32,21 +32,7 @@ public class MemberController {
         this.memberQueryService = memberQueryService;
     }
 
-    @PostMapping
-    @Operation(summary = "Create a new member", description = "Creates a new member")
-    public ResponseEntity<MemberResource> createMember(@RequestBody CreateMemberResource resource) {
-        var createMemberCommand = CreateMemberCommandFromResourceAssembler.toCommandFromResource(resource);
-        var member = memberCommandService.handle(createMemberCommand);
-
-        if(member.isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        var memberResource = MemberResourceFromEntityAssembler.toResourceFromEntity(member.get());
-
-        return new ResponseEntity<>(memberResource, HttpStatus.valueOf(201));
-    }
-
+    /*
     @GetMapping
     @Operation(summary = "Get all members", description = "Get all members")
     public ResponseEntity<List<MemberResource>> getAllMembers() {
@@ -57,6 +43,7 @@ public class MemberController {
                 .toList();
         return ResponseEntity.ok(memberResources);
     }
+    */
 
     @GetMapping("/{memberId}")
     @Operation(summary = "Get a member by id", description = "Get a member by id")
@@ -72,11 +59,13 @@ public class MemberController {
         return ResponseEntity.ok(memberResource);
     }
 
+    /*
     @GetMapping("/group/{groupId}")
     @Operation(summary = "Get members by group id", description = "Get members by group id")
     public ResponseEntity<List<MemberResource>> getMembersByGroupId(@PathVariable Long groupId) {
         var getMembersByGroupIdQuery = new GetMembersByGroupIdQuery(groupId);
         var members = memberQueryService.handle(getMembersByGroupIdQuery);
+        /*
         var memberResources = members.stream()
                 .map(MemberResourceFromEntityAssembler::toResourceFromEntity)
                 .toList();
@@ -93,8 +82,9 @@ public class MemberController {
             return ResponseEntity.badRequest().build();
         }
 
+
         var memberResource = MemberResourceFromEntityAssembler.toResourceFromEntity(member.get());
         return ResponseEntity.ok(memberResource);
     }
-
+    */
 }

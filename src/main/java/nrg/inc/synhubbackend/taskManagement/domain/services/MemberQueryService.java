@@ -1,5 +1,6 @@
 package nrg.inc.synhubbackend.taskManagement.domain.services;
 
+import nrg.inc.synhubbackend.iam.domain.model.aggregates.User;
 import nrg.inc.synhubbackend.taskManagement.domain.model.aggregates.Member;
 import nrg.inc.synhubbackend.taskManagement.domain.model.queries.GetAllMembersQuery;
 import nrg.inc.synhubbackend.taskManagement.domain.model.queries.GetMemberByIdQuery;
@@ -16,7 +17,7 @@ public interface MemberQueryService {
      * @param query the query containing the member ID
      * @return an Optional containing the member if found, or empty if not found
      */
-    Optional<Member> handle(GetMemberByIdQuery query);
+    Optional<User> handle(GetMemberByIdQuery query);
 
     /**
      * Retrieves all members.
