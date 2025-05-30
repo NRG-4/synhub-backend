@@ -10,13 +10,10 @@ import nrg.inc.synhubbackend.taskManagement.domain.model.queries.GetAllTasksQuer
 import nrg.inc.synhubbackend.taskManagement.domain.model.queries.GetTaskByIdQuery;
 import nrg.inc.synhubbackend.taskManagement.domain.services.TaskCommandService;
 import nrg.inc.synhubbackend.taskManagement.domain.services.TaskQueryService;
-import nrg.inc.synhubbackend.taskManagement.interfaces.rest.resources.CreateTaskResource;
 import nrg.inc.synhubbackend.taskManagement.interfaces.rest.resources.TaskResource;
 import nrg.inc.synhubbackend.taskManagement.interfaces.rest.resources.UpdateTaskResource;
-import nrg.inc.synhubbackend.taskManagement.interfaces.rest.transform.CreateTaskCommandFromResourceAssembler;
 import nrg.inc.synhubbackend.taskManagement.interfaces.rest.transform.TaskResourceFromEntityAssembler;
 import nrg.inc.synhubbackend.taskManagement.interfaces.rest.transform.UpdateTaskCommandFromResourceAssembler;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

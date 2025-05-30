@@ -1,6 +1,5 @@
 package nrg.inc.synhubbackend.taskManagement.interfaces.rest.transform;
 
-import nrg.inc.synhubbackend.taskManagement.domain.model.aggregates.Task;
 import nrg.inc.synhubbackend.taskManagement.domain.model.commands.UpdateTaskCommand;
 import nrg.inc.synhubbackend.taskManagement.interfaces.rest.resources.UpdateTaskResource;
 
