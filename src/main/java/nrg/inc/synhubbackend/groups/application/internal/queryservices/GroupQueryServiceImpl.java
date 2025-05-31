@@ -1,7 +1,6 @@
 package nrg.inc.synhubbackend.groups.application.internal.queryservices;
 
 import nrg.inc.synhubbackend.groups.domain.model.aggregates.Group;
-import nrg.inc.synhubbackend.groups.domain.model.queries.GetGroupByIdQuery;
 import nrg.inc.synhubbackend.groups.domain.model.queries.GetGroupByLeaderIdQuery;
 import nrg.inc.synhubbackend.groups.domain.services.GroupQueryService;
 import nrg.inc.synhubbackend.groups.infrastructure.persistence.jpa.repositories.GroupRepository;
@@ -16,11 +15,6 @@ public class GroupQueryServiceImpl implements GroupQueryService {
 
     public GroupQueryServiceImpl(GroupRepository groupRepository) {
         this.groupRepository = groupRepository;
-    }
-
-    @Override
-    public Optional<Group> handle(GetGroupByIdQuery query) {
-        return this.groupRepository.findById(query.groupId());
     }
 
     @Override

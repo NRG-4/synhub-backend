@@ -47,11 +47,6 @@ public class MemberController {
             return ResponseEntity.notFound().build();
         }
 
-        var role = member.get().getRoles().stream().findFirst().get().getName().toString();
-        if (!role.equals("ROLE_MEMBER")) {
-            return ResponseEntity.notFound().build();
-        }
-
         var userMemberResource = UserMemberResourceFromEntityAssembler.toResourceFromEntity(member.get());
         return ResponseEntity.ok(userMemberResource);
     }

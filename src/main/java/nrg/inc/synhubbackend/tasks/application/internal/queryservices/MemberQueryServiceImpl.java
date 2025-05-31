@@ -32,7 +32,15 @@ public class MemberQueryServiceImpl implements MemberQueryService {
 
     @Override
     public Optional<User> handle(GetUserMemberById query) {
-        return this.externalIamService.getUserById(query.userId());
+        var user = this.externalIamService.getUserById(query.userId());
+
+        var role = user.get().getRoles().stream().findFirst().get().getName().toString();
+
+        if (!role.equals("ROLE_MEMBER")){
+            return Optional.empty();
+        }
+
+        return user;
     }
 
     @Override

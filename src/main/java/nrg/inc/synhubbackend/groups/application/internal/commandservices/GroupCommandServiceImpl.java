@@ -5,7 +5,7 @@ import nrg.inc.synhubbackend.groups.domain.model.aggregates.Leader;
 import nrg.inc.synhubbackend.groups.domain.model.commands.CreateGroupCommand;
 import nrg.inc.synhubbackend.groups.domain.model.commands.DeleteGroupCommand;
 import nrg.inc.synhubbackend.groups.domain.model.commands.UpdateGroupCommand;
-import nrg.inc.synhubbackend.groups.domain.model.valueobjects.ImgUrl;
+import nrg.inc.synhubbackend.groups.domain.model.valueobjects.GroupCode;
 import nrg.inc.synhubbackend.groups.domain.services.GroupCommandService;
 import nrg.inc.synhubbackend.groups.infrastructure.persistence.jpa.repositories.GroupRepository;
 import nrg.inc.synhubbackend.groups.infrastructure.persistence.jpa.repositories.LeaderRepository;
@@ -29,7 +29,18 @@ public class GroupCommandServiceImpl implements GroupCommandService {
     public Optional<Group> handle(CreateGroupCommand command) {
 
         Leader leader = leaderRepository.findById(command.leaderId()).get();
-        Group group = new Group(command.name(), command.imgUrl(), leader, command.description(), 0);
+
+        Group group = new Group(
+                command.name(),
+                command.description(),
+                command.imgUrl(),
+                leader,
+                GroupCode.random()
+                );
+        while( groupRepository.existsByCode(group.getCode())) {
+            group.setCode(GroupCode.random());
+        }
+
         groupRepository.save(group);
 
         return Optional.of(group);
@@ -37,33 +48,37 @@ public class GroupCommandServiceImpl implements GroupCommandService {
 
     @Override
     public Optional<Group> handle(UpdateGroupCommand command) {
-
-        Optional<Group> groupOptional = groupRepository.findById(command.groupId());
-
-        if (groupOptional.isEmpty()) {
-            throw new IllegalArgumentException("Group not found");
+        var group = groupRepository.findByLeader_Id(command.leaderId()).get();
+        var groupId = group.getId();
+        if(!this.groupRepository.existsById(groupId)) {
+            throw new IllegalArgumentException("Group with id " + groupId + " does not exist");
         }
 
-        Group group = groupOptional.get();
-        group.setName(command.name());
-        group.setDescription(command.description());
-        group.setImgUrl(new ImgUrl(command.imgUrl()));
-        group.setMemberCount(command.memberCount());
-        groupRepository.save(group);
-        return Optional.of(group);
+        var groupToUpdate = groupRepository.findById(groupId).get();
+        groupToUpdate.updateInformation(command);
+
+        try{
+            var updatedGroup = groupRepository.save(groupToUpdate);
+            return Optional.of(updatedGroup);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Error while updating group: " + e.getMessage());
+        }
     }
 
     @Override
     public void handle(DeleteGroupCommand command) {
 
-        Optional<Group> groupOptional = groupRepository.findById(command.groupId());
+        var groupId = groupRepository.findByLeader_Id(command.leaderId()).get().getId();
 
-        if (groupOptional.isEmpty()) {
-            throw new IllegalArgumentException("Group not found");
+        var group = groupRepository.findById(groupId);
+
+        if(!this.groupRepository.existsById(groupId)) {
+            throw new IllegalArgumentException("Vehicle with id " + groupId + " does not exist");
         }
-
-        Group group = groupOptional.get();
-        groupRepository.delete(group);
-
+        try {
+            groupRepository.delete(group.get());
+        }catch (Exception e) {
+            throw new IllegalArgumentException("Error while deleting group: " + e.getMessage());
+        }
     }
 }

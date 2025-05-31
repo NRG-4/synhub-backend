@@ -29,6 +29,13 @@ public class LeaderQueryServiceImpl implements LeaderQueryService {
 
     @Override
     public Optional<User> handle(GetUserLeaderByIdQuery query) {
-        return externalIamService.getUserById(query.userId());
+        var user = externalIamService.getUserById(query.userId());
+
+        var role = user.get().getRoles().stream().findFirst().get().getName().toString();
+
+        if (!role.equals("ROLE_LEADER")){
+            return Optional.empty();
+        }
+        return user;
     }
 }
