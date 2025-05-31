@@ -7,9 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import nrg.inc.synhubbackend.groups.domain.model.valueobjects.ImgUrl;
 import nrg.inc.synhubbackend.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
-import nrg.inc.synhubbackend.taskManagement.domain.model.aggregates.Member;
-
-import java.util.List;
 
 @Entity
 @NoArgsConstructor

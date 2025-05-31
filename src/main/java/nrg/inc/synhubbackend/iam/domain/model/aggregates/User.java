@@ -9,7 +9,7 @@ import lombok.Setter;
 import nrg.inc.synhubbackend.groups.domain.model.aggregates.Leader;
 import nrg.inc.synhubbackend.iam.domain.model.entities.Role;
 import nrg.inc.synhubbackend.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
-import nrg.inc.synhubbackend.taskManagement.domain.model.aggregates.Member;
+import nrg.inc.synhubbackend.tasks.domain.model.aggregates.Member;
 
 import java.util.HashSet;
 import java.util.List;
