@@ -7,17 +7,20 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import nrg.inc.synhubbackend.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 
+import java.sql.Time;
+
 @Entity
 @Getter
 @Setter
-@NoArgsConstructor
 public class Leader extends AuditableAbstractAggregateRoot<Leader> {
 
-    @NotNull
-    String name;
+    Time averageSolutionTime;
 
-    public Leader(String name) {
-        this.name = name;
+    Integer solvedRequests;
+
+    public Leader() {
+        this.averageSolutionTime = new Time(0);
+        this.solvedRequests = 0;
     }
 
 }

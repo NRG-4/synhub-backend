@@ -5,17 +5,20 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import nrg.inc.synhubbackend.groups.domain.model.commands.UpdateGroupCommand;
+import nrg.inc.synhubbackend.groups.domain.model.valueobjects.GroupCode;
 import nrg.inc.synhubbackend.groups.domain.model.valueobjects.ImgUrl;
 import nrg.inc.synhubbackend.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
-import nrg.inc.synhubbackend.taskManagement.domain.model.aggregates.Member;
-
-import java.util.List;
 
 @Entity
 @NoArgsConstructor
 @Setter
 @Getter
 public class Group extends AuditableAbstractAggregateRoot<Group> {
+
+    @NotNull
+    @Column(unique = true)
+    private GroupCode code;
 
     @NotNull
     private String name;
@@ -34,14 +37,18 @@ public class Group extends AuditableAbstractAggregateRoot<Group> {
     @NotNull
     private Integer memberCount;
 
-    public Group(String name, String imgUrl , Leader leader, String description, Integer memberCount) {
+    public Group(String name, String description, String imgUrl , Leader leader, GroupCode code) {
         this.name = name;
         this.imgUrl = new ImgUrl(imgUrl);
         this.leader = leader;
         this.description = description;
-        this.memberCount = memberCount;
+        this.memberCount = 0;
+        this.code = code;
     }
 
-
-
+    public void updateInformation(UpdateGroupCommand command) {
+        this.name = command.name().isEmpty() ? this.name : command.name();
+        this.description = command.description().isEmpty() ? this.description : command.description();
+        this.imgUrl = command.imgUrl().isEmpty() ? this.imgUrl : new ImgUrl(command.imgUrl());
+    }
 }
