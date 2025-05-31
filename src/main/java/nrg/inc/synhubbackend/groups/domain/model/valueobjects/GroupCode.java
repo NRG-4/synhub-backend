@@ -5,12 +5,12 @@ import jakarta.persistence.Embeddable;
 import java.security.SecureRandom;
 
 @Embeddable
-public record GroupCode(String value) {
+public record GroupCode(String code) {
     private static final String ALPHANUM = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private static final int LENGTH = 9;
 
     public GroupCode {
-        if (value == null || value.length() != LENGTH || !value.matches("[0-9A-Z]{" + LENGTH + "}")) {
+        if (code == null || code.length() != LENGTH || !code.matches("[0-9A-Z]{" + LENGTH + "}")) {
             throw new IllegalArgumentException("El código debe tener 9 caracteres alfanuméricos (0-9, A-Z)");
         }
     }

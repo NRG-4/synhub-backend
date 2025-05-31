@@ -16,8 +16,8 @@ import nrg.inc.synhubbackend.shared.domain.model.aggregates.AuditableAbstractAgg
 @Getter
 public class Group extends AuditableAbstractAggregateRoot<Group> {
 
-    @NotNull
-    @Column(unique = true)
+    @Embedded
+    @AttributeOverride(name = "code", column = @Column(name = "code", unique = true))
     private GroupCode code;
 
     @NotNull

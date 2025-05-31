@@ -73,7 +73,7 @@ public class GroupCommandServiceImpl implements GroupCommandService {
         var group = groupRepository.findById(groupId);
 
         if(!this.groupRepository.existsById(groupId)) {
-            throw new IllegalArgumentException("Vehicle with id " + groupId + " does not exist");
+            throw new IllegalArgumentException("Group with id " + groupId + " does not exist");
         }
         try {
             groupRepository.delete(group.get());
