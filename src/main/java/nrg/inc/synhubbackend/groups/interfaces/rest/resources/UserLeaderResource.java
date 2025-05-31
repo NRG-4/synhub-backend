@@ -1,6 +1,6 @@
 package nrg.inc.synhubbackend.groups.interfaces.rest.resources;
 
-public record LeaderResource(
+public record UserLeaderResource(
         String username,
         String name,
         String surname,

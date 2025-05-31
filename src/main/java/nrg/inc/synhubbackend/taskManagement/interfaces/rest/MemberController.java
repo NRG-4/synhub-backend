@@ -7,12 +7,15 @@ import nrg.inc.synhubbackend.taskManagement.domain.model.commands.AddGroupToMemb
 import nrg.inc.synhubbackend.taskManagement.domain.model.queries.GetAllMembersQuery;
 import nrg.inc.synhubbackend.taskManagement.domain.model.queries.GetMemberByIdQuery;
 import nrg.inc.synhubbackend.taskManagement.domain.model.queries.GetMembersByGroupIdQuery;
+import nrg.inc.synhubbackend.taskManagement.domain.model.queries.GetUserMemberById;
 import nrg.inc.synhubbackend.taskManagement.domain.services.MemberCommandService;
 import nrg.inc.synhubbackend.taskManagement.domain.services.MemberQueryService;
 import nrg.inc.synhubbackend.taskManagement.interfaces.rest.resources.CreateMemberResource;
 import nrg.inc.synhubbackend.taskManagement.interfaces.rest.resources.MemberResource;
+import nrg.inc.synhubbackend.taskManagement.interfaces.rest.resources.UserMemberResource;
 import nrg.inc.synhubbackend.taskManagement.interfaces.rest.transform.CreateMemberCommandFromResourceAssembler;
 import nrg.inc.synhubbackend.taskManagement.interfaces.rest.transform.MemberResourceFromEntityAssembler;
+import nrg.inc.synhubbackend.taskManagement.interfaces.rest.transform.UserMemberResourceFromEntityAssembler;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -45,18 +48,23 @@ public class MemberController {
     }
     */
 
-    @GetMapping("/{memberId}")
+    @GetMapping("/{userId}")
     @Operation(summary = "Get a member by id", description = "Get a member by id")
-    public ResponseEntity<MemberResource> getMemberById(@PathVariable Long memberId) {
-        var getMemberByIdQuery = new GetMemberByIdQuery(memberId);
-        var member = this.memberQueryService.handle(getMemberByIdQuery);
+    public ResponseEntity<UserMemberResource> getMemberById(@PathVariable Long userId) {
+        var getUserMemberByIdQuery = new GetUserMemberById(userId);
+        var member = this.memberQueryService.handle(getUserMemberByIdQuery);
 
         if(member.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
-        var memberResource = MemberResourceFromEntityAssembler.toResourceFromEntity(member.get());
-        return ResponseEntity.ok(memberResource);
+        var role = member.get().getRoles().stream().findFirst().get().getName().toString();
+        if (!role.equals("ROLE_MEMBER")) {
+            return ResponseEntity.notFound().build();
+        }
+
+        var userMemberResource = UserMemberResourceFromEntityAssembler.toResourceFromEntity(member.get());
+        return ResponseEntity.ok(userMemberResource);
     }
 
     /*

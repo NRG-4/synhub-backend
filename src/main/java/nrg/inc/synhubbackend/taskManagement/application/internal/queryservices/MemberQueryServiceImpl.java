@@ -1,11 +1,12 @@
 package nrg.inc.synhubbackend.taskManagement.application.internal.queryservices;
 
 import nrg.inc.synhubbackend.iam.domain.model.aggregates.User;
-import nrg.inc.synhubbackend.taskManagement.application.external.outboundedservices.ExternalIamService;
+import nrg.inc.synhubbackend.shared.application.external.outboundedservices.ExternalIamService;
 import nrg.inc.synhubbackend.taskManagement.domain.model.aggregates.Member;
 import nrg.inc.synhubbackend.taskManagement.domain.model.queries.GetAllMembersQuery;
 import nrg.inc.synhubbackend.taskManagement.domain.model.queries.GetMemberByIdQuery;
 import nrg.inc.synhubbackend.taskManagement.domain.model.queries.GetMembersByGroupIdQuery;
+import nrg.inc.synhubbackend.taskManagement.domain.model.queries.GetUserMemberById;
 import nrg.inc.synhubbackend.taskManagement.domain.services.MemberQueryService;
 import nrg.inc.synhubbackend.taskManagement.infrastructure.persistence.jpa.repositories.MemberRepository;
 import org.springframework.stereotype.Service;
@@ -25,8 +26,13 @@ public class MemberQueryServiceImpl implements MemberQueryService {
     }
 
     @Override
-    public Optional<User> handle(GetMemberByIdQuery query) {
-        return this.externalIamService.getUserByMemberId(query.memberId());
+    public Optional<Member> handle(GetMemberByIdQuery query) {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<User> handle(GetUserMemberById query) {
+        return this.externalIamService.getUserById(query.userId());
     }
 
     @Override

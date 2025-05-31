@@ -4,12 +4,17 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import nrg.inc.synhubbackend.groups.domain.model.commands.CreateLeaderCommand;
 import nrg.inc.synhubbackend.groups.domain.model.queries.GetLeaderByIdQuery;
+import nrg.inc.synhubbackend.groups.domain.model.queries.GetUserLeaderByIdQuery;
 import nrg.inc.synhubbackend.groups.domain.services.LeaderCommandService;
 import nrg.inc.synhubbackend.groups.domain.services.LeaderQueryService;
 import nrg.inc.synhubbackend.groups.interfaces.rest.resources.LeaderResource;
+import nrg.inc.synhubbackend.groups.interfaces.rest.resources.UserLeaderResource;
 import nrg.inc.synhubbackend.groups.interfaces.rest.transform.LeaderResourceFromEntityAssembler;
+import nrg.inc.synhubbackend.groups.interfaces.rest.transform.UserLeaderResourceFromEntityAssembler;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping(value = "/api/v1/leaders")
@@ -24,27 +29,24 @@ public class LeaderController {
         this.leaderCommandService = leaderCommandService;
     }
 
-    @GetMapping("/{leaderId}")
-    @Operation(summary = "Get a leader by ID", description = "Gets a leader by ID")
-    public ResponseEntity<LeaderResource> getLeaderById(@PathVariable Long leaderId) {
-        var getLeaderByIdQuery = new GetLeaderByIdQuery(leaderId);
-        var leader = this.leaderQueryService.handle(getLeaderByIdQuery);
+    @GetMapping("/{userId}")
+    @Operation(summary = "Get a leader by user ID", description = "Gets a leader by user ID")
+    public ResponseEntity<UserLeaderResource> getLeaderById(@PathVariable Long userId) {
+
+        var getUserLeaderByIdQuery = new GetUserLeaderByIdQuery(userId);
+
+        var leader = this.leaderQueryService.handle(getUserLeaderByIdQuery);
 
         if (leader.isEmpty()) return ResponseEntity.notFound().build();
 
-        var leaderResource = LeaderResourceFromEntityAssembler.toResourceFromEntity(leader.get());
+        var role = leader.get().getRoles().stream().findFirst().get().getName().toString();
+
+        if (!role.equals("ROLE_LEADER")) {
+            return ResponseEntity.notFound().build();
+        }
+
+        var leaderResource = UserLeaderResourceFromEntityAssembler.toResourceFromEntity(leader.get());
         return ResponseEntity.ok(leaderResource);
     }
-
-    @PostMapping
-    @Operation(summary = "Create a new leader", description = "Creates a new leader")
-    public ResponseEntity<LeaderResource> createLeader(@RequestBody LeaderResource leaderResource) {
-        var createLeaderCommand = new CreateLeaderCommand();
-        var leader = this.leaderCommandService.handle(createLeaderCommand);
-
-        var createdLeaderResource = LeaderResourceFromEntityAssembler.toResourceFromEntity(leader.get());
-        return ResponseEntity.status(201).body(createdLeaderResource);
-    }
-
 
 }
