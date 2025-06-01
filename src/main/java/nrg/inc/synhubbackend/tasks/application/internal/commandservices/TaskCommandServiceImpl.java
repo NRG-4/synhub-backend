@@ -1,5 +1,6 @@
 package nrg.inc.synhubbackend.tasks.application.internal.commandservices;
 
+import nrg.inc.synhubbackend.groups.infrastructure.persistence.jpa.repositories.GroupRepository;
 import nrg.inc.synhubbackend.tasks.domain.model.aggregates.Task;
 import nrg.inc.synhubbackend.tasks.domain.model.commands.CreateTaskCommand;
 import nrg.inc.synhubbackend.tasks.domain.model.commands.DeleteTaskCommand;
@@ -17,10 +18,12 @@ public class TaskCommandServiceImpl implements TaskCommandService {
 
     private final TaskRepository taskRepository;
     private final MemberRepository memberRepository;
+    private final GroupRepository groupRepository;
 
-    public TaskCommandServiceImpl(TaskRepository taskRepository, MemberRepository memberRepository) {
+    public TaskCommandServiceImpl(TaskRepository taskRepository, MemberRepository memberRepository, GroupRepository groupRepository) {
         this.taskRepository = taskRepository;
         this.memberRepository = memberRepository;
+        this.groupRepository = groupRepository;
     }
 
     @Override
@@ -30,8 +33,24 @@ public class TaskCommandServiceImpl implements TaskCommandService {
         if (member.isEmpty()) {
             throw new IllegalArgumentException("Member with id " + command.memberId() + " does not exist");
         }
-        task.setMember(member.get());
 
+        var groupId = member.get().getGroup() != null ? member.get().getGroup().getId() : null;
+
+        if(groupId == null) {
+            throw new IllegalArgumentException("Member with id " + command.memberId() + " does not belong to any group");
+        }
+
+        var group = this.groupRepository.findById(groupId);
+
+        if (group.isEmpty()) {
+            throw new IllegalArgumentException("Group with id " + groupId + " does not exist");
+        }
+
+        task.setMember(member.get());
+        task.setGroup(group.get());
+        member.get().addTask(task);
+
+        this.memberRepository.save(member.get());
         var createdTask = taskRepository.save(task);
 
         return Optional.of(createdTask);
@@ -39,24 +58,52 @@ public class TaskCommandServiceImpl implements TaskCommandService {
 
     @Override
     public Optional<Task> handle(UpdateTaskCommand command) {
-        var taskId = command.taskId();
-        var memberId = command.memberId();
-        if(!taskRepository.existsById(taskId)) {
-            throw new IllegalArgumentException("Task with id " + taskId + " does not exist");
+        var taskOpt = this.taskRepository.findById(command.taskId());
+        var newMemberOpt = this.memberRepository.findById(command.memberId());
+
+        if (taskOpt.isEmpty()) {
+            throw new IllegalArgumentException("Task with id " + command.taskId() + " does not exist");
         }
-        var taskToUpdate = this.taskRepository.findById(taskId).get();
-        if(memberId != null && memberId != 0) {
-            if(!memberRepository.existsById(memberId)) {
-                throw new IllegalArgumentException("Member with id " + memberId + " does not exist");
-            }
-            var member = this.memberRepository.findById(memberId);
-            taskToUpdate.setMember(member.get());
+        if (newMemberOpt.isEmpty()) {
+            throw new IllegalArgumentException("Member with id " + command.memberId() + " does not exist");
         }
 
-        taskToUpdate.updateTask(command);
+        var task = taskOpt.get();
+        var currentMember = task.getMember();
+        var newMember = newMemberOpt.get();
+
+        var groupId = newMember.getGroup() != null ? newMember.getGroup().getId() : null;
+
+        if(groupId == null) {
+            throw new IllegalArgumentException("Member with id " + command.memberId() + " does not belong to any group");
+        }
+
+        var group = this.groupRepository.findById(groupId);
+
+        if (group.isEmpty()) {
+            throw new IllegalArgumentException("Group with id " + groupId + " does not exist");
+        }
+
+        var newGroup = this.groupRepository.findById(newMember.getGroup().getId());
+
+        if (currentMember != null && !currentMember.equals(newMember)) {
+            currentMember.removeTask(task);
+            this.memberRepository.save(currentMember);
+            newMember.addTask(task);
+            task.setMember(newMember);
+            task.setGroup(newGroup.get());
+            this.memberRepository.save(newMember);
+        } else if (currentMember == null) {
+            newMember.addTask(task);
+            task.setMember(newMember);
+            task.setGroup(newGroup.get());
+            this.memberRepository.save(newMember);
+        }
+
+        task.updateTask(command);
 
         try{
-            var updatedTask = this.taskRepository.save(taskToUpdate);
+            var updatedTask = this.taskRepository.save(task);
             return Optional.of(updatedTask);
         } catch (Exception e){
             throw new IllegalArgumentException("Error updating task: " + e.getMessage());
@@ -70,6 +117,11 @@ public class TaskCommandServiceImpl implements TaskCommandService {
             throw new IllegalArgumentException("Task with id " + taskId + " does not exist");
         }
         try {
+            var member = this.taskRepository.findById(taskId).get().getMember();
+            if (member != null) {
+                member.removeTask(this.taskRepository.findById(taskId).get());
+                this.memberRepository.save(member);
+            }
             this.taskRepository.deleteById(taskId);
         } catch (Exception e) {
             throw new IllegalArgumentException("Error deleting task: " + e.getMessage());
@@ -85,9 +137,8 @@ public class TaskCommandServiceImpl implements TaskCommandService {
 
         var taskToUpdate = this.taskRepository.findById(taskId).get();
 
-        taskToUpdate.updateStatus(command);
-
         try{
+            taskToUpdate.updateStatus(command);
             var updatedTask = this.taskRepository.save(taskToUpdate);
             return Optional.of(updatedTask);
         } catch (Exception e){

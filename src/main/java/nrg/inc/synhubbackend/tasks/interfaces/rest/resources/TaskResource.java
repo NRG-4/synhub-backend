@@ -9,6 +9,7 @@ public record TaskResource(
         String createdAt,
         String updatedAt,
         String status,
-        TaskMemberResource member
+        TaskMemberResource member,
+        Long groupId
 ) {
 }

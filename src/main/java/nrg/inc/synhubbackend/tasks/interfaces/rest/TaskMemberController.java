@@ -17,8 +17,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/v1/{memberId}/tasks")
-@Tag(name = "Member Tasks", description = "Member Tasks endpoints")
+@RequestMapping("/api/v1/members/{memberId}/tasks")
+@Tag(name = "Tasks Member ", description = "Tasks Member endpoints")
 @CrossOrigin(origins = "*", methods = { RequestMethod.POST, RequestMethod.GET, RequestMethod.PUT, RequestMethod.DELETE })
 public class TaskMemberController {
     private final TaskCommandService taskCommandService;

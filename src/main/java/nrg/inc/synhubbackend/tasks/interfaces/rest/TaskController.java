@@ -46,7 +46,7 @@ public class TaskController {
         return ResponseEntity.ok(taskResource);
     }
 
-    //get all tasks
+    /*
     @GetMapping
     @Operation(summary = "Get all tasks", description = "Get all tasks")
     public ResponseEntity<List<TaskResource>> getAllTasks() {
@@ -57,6 +57,7 @@ public class TaskController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(taskResources);
     }
+    */
 
     @GetMapping("/status/{status}")
     @Operation(summary = "Get all tasks by status", description = "Get all tasks by status")

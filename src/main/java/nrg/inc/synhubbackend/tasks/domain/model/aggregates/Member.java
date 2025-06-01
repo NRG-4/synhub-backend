@@ -25,4 +25,14 @@ public class Member extends AuditableAbstractAggregateRoot<Member> {
 
     public Member(CreateMemberCommand command) {
     }
+
+    public void addTask(Task task) {
+        this.tasks.add(task);
+        task.setMember(this);
+    }
+
+    public void removeTask(Task task) {
+        this.tasks.remove(task);
+        task.setMember(null);
+    }
 }
