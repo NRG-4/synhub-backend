@@ -1,10 +1,7 @@
 package nrg.inc.synhubbackend.tasks.application.internal.queryservices;
 
 import nrg.inc.synhubbackend.tasks.domain.model.aggregates.Task;
-import nrg.inc.synhubbackend.tasks.domain.model.queries.GetAllTaskByStatusQuery;
-import nrg.inc.synhubbackend.tasks.domain.model.queries.GetAllTasksByMemberId;
-import nrg.inc.synhubbackend.tasks.domain.model.queries.GetAllTasksQuery;
-import nrg.inc.synhubbackend.tasks.domain.model.queries.GetTaskByIdQuery;
+import nrg.inc.synhubbackend.tasks.domain.model.queries.*;
 import nrg.inc.synhubbackend.tasks.domain.model.valueobjects.TaskStatus;
 import nrg.inc.synhubbackend.tasks.domain.services.TaskQueryService;
 import nrg.inc.synhubbackend.tasks.infrastructure.persistence.jpa.repositories.TaskRepository;
@@ -42,5 +39,10 @@ public class TaskQueryServiceImpl implements TaskQueryService {
     public List<Task> handle(GetAllTaskByStatusQuery query) {
         TaskStatus taskStatus = TaskStatus.valueOf(query.taskStatus());
         return taskRepository.findByStatus(taskStatus);
+    }
+
+    @Override
+    public List<Task> handle(GetAllTasksByGroupIdQuery query) {
+        return taskRepository.findByGroup_Id(query.groupId());
     }
 }

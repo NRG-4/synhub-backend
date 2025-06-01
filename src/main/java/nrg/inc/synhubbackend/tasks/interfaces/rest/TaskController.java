@@ -6,7 +6,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import nrg.inc.synhubbackend.tasks.domain.model.commands.DeleteTaskCommand;
 import nrg.inc.synhubbackend.tasks.domain.model.commands.UpdateTaskStatusCommand;
 import nrg.inc.synhubbackend.tasks.domain.model.queries.GetAllTaskByStatusQuery;
-import nrg.inc.synhubbackend.tasks.domain.model.queries.GetAllTasksQuery;
 import nrg.inc.synhubbackend.tasks.domain.model.queries.GetTaskByIdQuery;
 import nrg.inc.synhubbackend.tasks.domain.services.TaskCommandService;
 import nrg.inc.synhubbackend.tasks.domain.services.TaskQueryService;

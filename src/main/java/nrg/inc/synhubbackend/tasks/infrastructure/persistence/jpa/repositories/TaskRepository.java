@@ -11,4 +11,5 @@ import java.util.List;
 public interface TaskRepository extends JpaRepository<Task, Long> {
     List<Task> findByMemberId(Long memberId);
     List<Task> findByStatus(TaskStatus status);
+    List<Task> findByGroup_Id(Long groupId);
 }
