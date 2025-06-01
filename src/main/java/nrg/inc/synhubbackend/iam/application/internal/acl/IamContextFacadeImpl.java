@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static java.util.Locale.filter;
+
 @Service
 public class IamContextFacadeImpl implements IamContextFacade {
     private final UserCommandService userCommandService;
