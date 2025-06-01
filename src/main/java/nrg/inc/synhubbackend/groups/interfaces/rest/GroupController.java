@@ -3,6 +3,7 @@ package nrg.inc.synhubbackend.groups.interfaces.rest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import nrg.inc.synhubbackend.groups.domain.model.queries.GetGroupByCodeQuery;
+import nrg.inc.synhubbackend.groups.domain.model.queries.GetGroupByMemberIdQuery;
 import nrg.inc.synhubbackend.groups.domain.services.GroupQueryService;
 import nrg.inc.synhubbackend.groups.interfaces.rest.resources.GroupResource;
 import nrg.inc.synhubbackend.groups.interfaces.rest.transform.GroupResourceFromEntityAssembler;
@@ -24,6 +25,18 @@ public class GroupController {
     public ResponseEntity<GroupResource> searchGroupByCode(@RequestParam String code) {
         var getGroupByCodeQuery = new GetGroupByCodeQuery(code);
         var group = this.groupQueryService.handle(getGroupByCodeQuery);
+        if (group.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        var groupResource = GroupResourceFromEntityAssembler.toResourceFromEntity(group.get());
+        return ResponseEntity.ok(groupResource);
+    }
+
+    @GetMapping("/members/{memberId}")
+    @Operation(summary = "Get group by member ID", description = "Get the group associated with a specific member ID")
+    public ResponseEntity<GroupResource> getGroupByMemberId(@PathVariable Long memberId) {
+        var getGroupByMemberIdQuery = new GetGroupByMemberIdQuery(memberId);
+        var group = this.groupQueryService.handle(getGroupByMemberIdQuery);
         if (group.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
