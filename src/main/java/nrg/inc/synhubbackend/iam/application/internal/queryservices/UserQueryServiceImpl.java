@@ -79,4 +79,9 @@ public class UserQueryServiceImpl implements UserQueryService {
   public Optional<User> handle(GetUserByLeaderId query) {
     return userRepository.findByLeader_Id(query.leaderId());
   }
+
+  @Override
+  public List<User> handle(GetUsersByGroupIdQuery query) {
+    return userRepository.findByMember_Group_Id(query.groupId());
+  }
 }

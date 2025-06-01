@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import nrg.inc.synhubbackend.groups.domain.model.commands.CreateGroupCommand;
 import nrg.inc.synhubbackend.groups.domain.model.commands.DeleteGroupCommand;
+import nrg.inc.synhubbackend.groups.domain.model.commands.RemoveMemberFromGroupCommand;
 import nrg.inc.synhubbackend.groups.domain.model.commands.UpdateGroupCommand;
 import nrg.inc.synhubbackend.groups.domain.model.queries.GetGroupByLeaderIdQuery;
 import nrg.inc.synhubbackend.groups.domain.model.queries.GetLeaderByIdQuery;
@@ -18,7 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(value = "/api/v1/leaders")
+@RequestMapping(value = "/api/v1/leaders/{leaderId}/group")
 @Tag(name = "Groups", description = "Group management API")
 
 public class LeaderGroupController {
@@ -33,7 +34,7 @@ public class LeaderGroupController {
         this.leaderQueryService = leaderQueryService;
     }
 
-    @PostMapping("{leaderId}/group")
+    @PostMapping
     @Operation(summary = "Create a new group", description = "Creates a new group")
     public ResponseEntity<GroupResource> createGroup(@RequestBody CreateGroupResource resource, @PathVariable Long leaderId) {
 
@@ -60,7 +61,7 @@ public class LeaderGroupController {
         return ResponseEntity.ok(groupResourceCreated);
     }
 
-    @PutMapping("/{leaderId}/group")
+    @PutMapping
     @Operation(summary = "Update a group", description = "Updates a group")
     public ResponseEntity<GroupResource> updateGroup(@PathVariable Long leaderId, @RequestBody UpdateGroupResource groupResource) {
         var updateGroupCommand = new UpdateGroupCommand(
@@ -78,7 +79,7 @@ public class LeaderGroupController {
         return ResponseEntity.ok(groupResourceUpdated);
     }
 
-    @DeleteMapping("/{leaderId}/group")
+    @DeleteMapping
     @Operation(summary = "Delete a group", description = "Deletes a group")
     public ResponseEntity<Void> deleteGroup(@PathVariable Long leaderId) {
         var deleteGroupCommand = new DeleteGroupCommand(leaderId);
@@ -86,7 +87,7 @@ public class LeaderGroupController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{leaderId}/group")
+    @GetMapping
     @Operation(summary = "Get a group by ID", description = "Gets a group by ID")
     public ResponseEntity<GroupResource> getGroupById(@PathVariable Long leaderId) {
         var getGroupByLeaderIdQuery = new GetGroupByLeaderIdQuery(leaderId);
@@ -95,4 +96,13 @@ public class LeaderGroupController {
         var groupResource = GroupResourceFromEntityAssembler.toResourceFromEntity(group.get());
         return ResponseEntity.ok(groupResource);
     }
+
+    @DeleteMapping("/members/{memberId}")
+    @Operation(summary = "Remove a member from the group", description = "Removes a member from the group")
+    public ResponseEntity<Void> removeMemberFromGroup(@PathVariable Long leaderId, @PathVariable Long memberId) {
+        var removeMemberFromGroupCommand = new RemoveMemberFromGroupCommand(leaderId, memberId);
+        this.groupCommandService.handle(removeMemberFromGroupCommand);
+        return ResponseEntity.noContent().build();
+    }
+
 }

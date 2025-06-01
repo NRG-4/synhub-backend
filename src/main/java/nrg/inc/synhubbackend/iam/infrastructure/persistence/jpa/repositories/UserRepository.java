@@ -4,6 +4,7 @@ import nrg.inc.synhubbackend.iam.domain.model.aggregates.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -47,4 +48,6 @@ public interface UserRepository extends JpaRepository<User, Long>
    * @return The user object.
    */
   Optional<User> findByLeader_Id(Long leaderId);
+
+  List<User> findByMember_Group_Id(Long groupId);
 }

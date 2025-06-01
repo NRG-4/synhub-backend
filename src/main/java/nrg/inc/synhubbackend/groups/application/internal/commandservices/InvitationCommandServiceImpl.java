@@ -96,9 +96,7 @@ public class InvitationCommandServiceImpl implements InvitationCommandService {
 
         member.setGroup(group);
         group.getMembers().add(member);
-
-        group.setMemberCount(group.getMemberCount() + 1);
-
+        group.setMemberCount(group.getMembers().size());
         this.memberRepository.save(member);
         this.groupRepository.save(group);
 
