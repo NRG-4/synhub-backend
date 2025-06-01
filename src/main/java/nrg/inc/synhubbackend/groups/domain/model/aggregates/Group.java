@@ -40,7 +40,7 @@ public class Group extends AuditableAbstractAggregateRoot<Group> {
     @NotNull
     private Integer memberCount;
 
-    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "group")
     private List<Member> members;
 
     public Group(String name, String description, String imgUrl , Leader leader, GroupCode code) {
@@ -56,5 +56,10 @@ public class Group extends AuditableAbstractAggregateRoot<Group> {
         this.name = command.name().isEmpty() ? this.name : command.name();
         this.description = command.description().isEmpty() ? this.description : command.description();
         this.imgUrl = command.imgUrl().isEmpty() ? this.imgUrl : new ImgUrl(command.imgUrl());
+    }
+
+    public void removeMember(Long memberId) {
+        this.members.removeIf(member -> member.getId().equals(memberId));
+        this.memberCount--;
     }
 }
