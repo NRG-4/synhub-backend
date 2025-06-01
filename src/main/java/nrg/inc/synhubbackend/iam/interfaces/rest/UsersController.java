@@ -70,42 +70,4 @@ public class UsersController {
     var userResource = UserResourceFromEntityAssembler.toResourceFromEntity(user.get());
     return ResponseEntity.ok(userResource);
   }
-
-  @PutMapping(value = "/{userId}/leader")
-  @Operation(summary = "Set user as leader", description = "Set user as leader")
-  public ResponseEntity<UserResource> setUserLeader(@PathVariable Long userId) {
-    if(this.userQueryService.handle(new GetUserByIdQuery(userId)) == null) {
-      return ResponseEntity.notFound().build();
-    }
-    var role = this.userQueryService.handle(new GetUserByIdQuery(userId)).get().getRoles().stream().findFirst().get().getName().toString();
-    if(!role.equals("ROLE_LEADER")) {
-      throw new RuntimeException("User is not a leader");
-    }
-    var createUserLeaderCommand = CreateUserLeaderCommandFromResourceAssembler.toCommandFromResource(userId);
-    var user = userCommandService.handle(createUserLeaderCommand);
-    if (user.isEmpty()) {
-      return ResponseEntity.badRequest().build();
-    }
-    var userResource = UserResourceFromEntityAssembler.toResourceFromEntity(user.get());
-    return ResponseEntity.ok(userResource);
-  }
-
-  @PutMapping(value = "/{userId}/member")
-  @Operation(summary = "Set user as member", description = "Set user as member")
-  public ResponseEntity<UserResource> setUserMember(@PathVariable Long userId) {
-    if (this.userQueryService.handle(new GetUserByIdQuery(userId)) == null) {
-      return ResponseEntity.notFound().build();
-    }
-    var role = this.userQueryService.handle(new GetUserByIdQuery(userId)).get().getRoles().stream().findFirst().get().getName().toString();
-    if (!role.equals("ROLE_MEMBER")) {
-        throw new RuntimeException("User is not a member");
-    }
-    var createMemberCommand = CreateUserMemberCommandFromResourceAssembler.toCommandFromResource(userId);
-    var user = userCommandService.handle(createMemberCommand);
-    if (user.isEmpty()) {
-      return ResponseEntity.badRequest().build();
-    }
-    var userResource = UserResourceFromEntityAssembler.toResourceFromEntity(user.get());
-    return ResponseEntity.ok(userResource);
-  }
 }

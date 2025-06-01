@@ -13,4 +13,6 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
     Optional<Group> findByLeader_Id(Long leaderId);
 
     boolean existsByCode(GroupCode code);
+
+    Optional<Group> findByCode(GroupCode code);
 }

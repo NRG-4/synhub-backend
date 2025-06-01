@@ -14,8 +14,7 @@ import java.util.List;
 @Entity
 public class Member extends AuditableAbstractAggregateRoot<Member> {
 
-
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "group_id", nullable = true)
     private Group group;
 

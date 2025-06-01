@@ -6,10 +6,7 @@ import nrg.inc.synhubbackend.iam.interfaces.rest.resources.AuthenticatedUserReso
 import nrg.inc.synhubbackend.iam.interfaces.rest.resources.SignInResource;
 import nrg.inc.synhubbackend.iam.interfaces.rest.resources.SignUpResource;
 import nrg.inc.synhubbackend.iam.interfaces.rest.resources.UserResource;
-import nrg.inc.synhubbackend.iam.interfaces.rest.transform.AuthenticatedUserResourceFromEntityAssembler;
-import nrg.inc.synhubbackend.iam.interfaces.rest.transform.SignInCommandFromResourceAssembler;
-import nrg.inc.synhubbackend.iam.interfaces.rest.transform.SignUpCommandFromResourceAssembler;
-import nrg.inc.synhubbackend.iam.interfaces.rest.transform.UserResourceFromEntityAssembler;
+import nrg.inc.synhubbackend.iam.interfaces.rest.transform.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -75,6 +72,25 @@ public class AuthenticationController {
     if (user.isEmpty()) {
       return ResponseEntity.badRequest().build();
     }
+
+    var role = user.get().getRoles().stream().findFirst().get().getName().toString();
+
+    if(role.equals("ROLE_LEADER")){
+      var createUserLeaderCommand = CreateUserLeaderCommandFromResourceAssembler.toCommandFromResource(user.get().getId());
+      user = userCommandService.handle(createUserLeaderCommand);
+      if (user.isEmpty()) {
+        return ResponseEntity.badRequest().build();
+      }
+    }
+
+    if(role.equals("ROLE_MEMBER")){
+      var createuserMemberCommand = CreateUserMemberCommandFromResourceAssembler.toCommandFromResource(user.get().getId());
+      user = userCommandService.handle(createuserMemberCommand);
+      if (user.isEmpty()) {
+        return ResponseEntity.badRequest().build();
+      }
+    }
+
     var userResource = UserResourceFromEntityAssembler.toResourceFromEntity(user.get());
     return new ResponseEntity<>(userResource, HttpStatus.CREATED);
   }
