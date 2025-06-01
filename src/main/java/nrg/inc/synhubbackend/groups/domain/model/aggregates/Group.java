@@ -9,6 +9,9 @@ import nrg.inc.synhubbackend.groups.domain.model.commands.UpdateGroupCommand;
 import nrg.inc.synhubbackend.groups.domain.model.valueobjects.GroupCode;
 import nrg.inc.synhubbackend.groups.domain.model.valueobjects.ImgUrl;
 import nrg.inc.synhubbackend.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
+import nrg.inc.synhubbackend.tasks.domain.model.aggregates.Member;
+
+import java.util.List;
 
 @Entity
 @NoArgsConstructor
@@ -36,6 +39,9 @@ public class Group extends AuditableAbstractAggregateRoot<Group> {
 
     @NotNull
     private Integer memberCount;
+
+    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Member> members;
 
     public Group(String name, String description, String imgUrl , Leader leader, GroupCode code) {
         this.name = name;

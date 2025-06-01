@@ -19,4 +19,9 @@ public class Invitation extends AuditableAbstractAggregateRoot<Invitation> {
     private Group group;
 
     public Invitation() {}
+
+    public Invitation(Member member, Group group) {
+        this.member = member;
+        this.group = group;
+    }
 }
