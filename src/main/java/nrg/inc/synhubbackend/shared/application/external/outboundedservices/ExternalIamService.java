@@ -4,6 +4,7 @@ import nrg.inc.synhubbackend.iam.domain.model.aggregates.User;
 import nrg.inc.synhubbackend.iam.interfaces.acl.IamContextFacade;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -14,7 +15,7 @@ public class ExternalIamService {
         this.iamContextFacade = iamContextFacade;
     }
     public Optional<User> getUserByLeaderId(Long leaderId) {
-        var user = this.iamContextFacade.fetchByLeaderId(leaderId);
+        var user = this.iamContextFacade.fetchUserByLeaderId(leaderId);
         if (user.isEmpty()) {
             throw new IllegalArgumentException("User not found for leaderId: " + leaderId);
         }
@@ -22,7 +23,7 @@ public class ExternalIamService {
     }
 
     public Optional<User> getUserById(Long userId) {
-        var user = this.iamContextFacade.fetchById(userId);
+        var user = this.iamContextFacade.fetchUserById(userId);
         if (user.isEmpty()) {
             throw new IllegalArgumentException("User not found for userId: " + userId);
         }
@@ -30,10 +31,15 @@ public class ExternalIamService {
     }
 
     public Optional<User> getUserByMemberId(Long memberId) {
-        var user = this.iamContextFacade.fetchByMemberId(memberId);
+        var user = this.iamContextFacade.fetchUserByMemberId(memberId);
         if (user.isEmpty()) {
             throw new IllegalArgumentException("User not found for memberId: " + memberId);
         }
         return user;
+    }
+
+    public List<User> getUsersByGroup_Id(Long groupId) {
+        var userList = this.iamContextFacade.fetchUsersByGroupId(groupId);
+        return userList;
     }
 }

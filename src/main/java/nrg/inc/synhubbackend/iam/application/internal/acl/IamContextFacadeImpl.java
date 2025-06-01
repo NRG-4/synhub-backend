@@ -3,10 +3,7 @@ package nrg.inc.synhubbackend.iam.application.internal.acl;
 import nrg.inc.synhubbackend.iam.domain.model.aggregates.User;
 import nrg.inc.synhubbackend.iam.domain.model.commands.SignUpCommand;
 import nrg.inc.synhubbackend.iam.domain.model.entities.Role;
-import nrg.inc.synhubbackend.iam.domain.model.queries.GetUserByIdQuery;
-import nrg.inc.synhubbackend.iam.domain.model.queries.GetUserByLeaderId;
-import nrg.inc.synhubbackend.iam.domain.model.queries.GetUserByMemberId;
-import nrg.inc.synhubbackend.iam.domain.model.queries.GetUserByUsernameQuery;
+import nrg.inc.synhubbackend.iam.domain.model.queries.*;
 import nrg.inc.synhubbackend.iam.domain.services.UserCommandService;
 import nrg.inc.synhubbackend.iam.domain.services.UserQueryService;
 import nrg.inc.synhubbackend.iam.interfaces.acl.IamContextFacade;
@@ -111,7 +108,7 @@ public class IamContextFacadeImpl implements IamContextFacade {
      * @param memberId The id of the user.
      * @return An Optional containing the user if found, otherwise empty.
      */
-    public Optional<User> fetchByMemberId(Long memberId) {
+    public Optional<User> fetchUserByMemberId(Long memberId) {
         if (memberId == null || memberId <= 0) {
             return Optional.empty();
         }
@@ -123,7 +120,7 @@ public class IamContextFacadeImpl implements IamContextFacade {
         return Optional.of(result.get());
     }
 
-    public Optional<User> fetchByLeaderId(Long leaderId) {
+    public Optional<User> fetchUserByLeaderId(Long leaderId) {
         if (leaderId == null || leaderId <= 0) {
             return Optional.empty();
         }
@@ -136,7 +133,7 @@ public class IamContextFacadeImpl implements IamContextFacade {
     }
 
     @Override
-    public Optional<User> fetchById(Long userId) {
+    public Optional<User> fetchUserById(Long userId) {
         if( userId == null || userId <= 0) {
             return Optional.empty();
         }
@@ -146,5 +143,12 @@ public class IamContextFacadeImpl implements IamContextFacade {
             return Optional.empty();
         }
         return Optional.of(result.get());
+    }
+
+    @Override
+    public List<User> fetchUsersByGroupId(Long groupId) {
+        var getUserByGroupIdQuery = new GetUsersByGroupIdQuery(groupId);
+        var result = userQueryService.handle(getUserByGroupIdQuery);
+        return result;
     }
 }
