@@ -1,4 +1,4 @@
 package nrg.inc.synhubbackend.groups.domain.model.queries;
 
-public record GetInvitationByMemberIdQuery() {
+public record GetInvitationByMemberIdQuery(Long memberId) {
 }
