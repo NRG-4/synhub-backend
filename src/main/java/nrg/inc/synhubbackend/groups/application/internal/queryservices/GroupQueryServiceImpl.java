@@ -2,6 +2,7 @@ package nrg.inc.synhubbackend.groups.application.internal.queryservices;
 
 import nrg.inc.synhubbackend.groups.domain.model.aggregates.Group;
 import nrg.inc.synhubbackend.groups.domain.model.queries.GetGroupByCodeQuery;
+import nrg.inc.synhubbackend.groups.domain.model.queries.GetGroupByIdQuery;
 import nrg.inc.synhubbackend.groups.domain.model.queries.GetGroupByLeaderIdQuery;
 import nrg.inc.synhubbackend.groups.domain.model.queries.GetGroupByMemberIdQuery;
 import nrg.inc.synhubbackend.groups.domain.model.valueobjects.GroupCode;
@@ -52,6 +53,12 @@ public class GroupQueryServiceImpl implements GroupQueryService {
 
         return groupSearched;
     }
+
+    @Override
+    public Optional<Group> handle(GetGroupByIdQuery query) {
+        return this.groupRepository.findById(query.groupId());
+    }
+
 
 
 }
