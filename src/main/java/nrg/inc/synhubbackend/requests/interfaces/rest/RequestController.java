@@ -1,7 +1,6 @@
 package nrg.inc.synhubbackend.requests.interfaces.rest;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import nrg.inc.synhubbackend.requests.domain.model.queries.GetRequestByIdQuery;
 import nrg.inc.synhubbackend.requests.domain.model.valueobjects.RequestType;
@@ -33,6 +32,7 @@ public class RequestController {
     }
 
     @PostMapping
+    @Operation(summary = "Create a new request", description = "Create a new request")
     public ResponseEntity<RequestResource> createRequest(@RequestBody CreateRequestResource resource) {
         try {
             RequestType.fromString(resource.requestType());
@@ -55,6 +55,7 @@ public class RequestController {
     }
 
     @GetMapping("/{requestId}")
+    @Operation(summary = "Get a request by id", description = "Get a request by id")
     public ResponseEntity<RequestResource> getRequestById(@PathVariable Long requestId) {
         var getRequestByIdQuery = new GetRequestByIdQuery(requestId);
         var optionalRequest = this.requestQueryService.handle(getRequestByIdQuery);
@@ -68,6 +69,7 @@ public class RequestController {
     }
 
     @PutMapping("/{requestId}/status")
+    @Operation(summary = "Update request status", description = "Update the status of a request")
     public ResponseEntity<RequestResource> updateRequestStatus(@PathVariable Long requestId, @RequestBody UpdateRequestStatusResource resource) {
             var updateRequestCommand = UpdateRequestCommandFromResourceAssembler.toCommandFromResource(requestId, resource.requestStatus());
             var optionalRequest = this.requestCommandService.handle(updateRequestCommand);
