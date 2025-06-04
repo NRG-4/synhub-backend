@@ -50,6 +50,10 @@ public class RequestController {
         var getRequestByIdQuery = new GetRequestByIdQuery(requestId);
         var optionalRequest = this.requestQueryService.handle(getRequestByIdQuery);
 
+        if (optionalRequest.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
         var requestResource = RequestResourceFromEntityAssembler.toResourceFromEntity(optionalRequest.get());
         return new ResponseEntity<>(requestResource, HttpStatus.CREATED);
     }
