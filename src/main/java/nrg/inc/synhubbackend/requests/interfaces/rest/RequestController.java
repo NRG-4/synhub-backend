@@ -64,25 +64,11 @@ public class RequestController {
         var getRequestByTaskIdQuery = new GetRequestByTaskIdQuery(taskId);
         var optionalRequest = this.requestQueryService.handle(getRequestByTaskIdQuery);
 
-    if (optionalRequest.isPresent()) {
-            var requestResource = RequestResourceFromEntityAssembler.toResourceFromEntity(optionalRequest.get());
-            return ResponseEntity.ok(requestResource);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @GetMapping("/{requestId}")
-    @Operation(summary = "Get a request by id", description = "Get a request by id")
-    public ResponseEntity<RequestResource> getRequestById(@PathVariable Long requestId) {
-        var getRequestByIdQuery = new GetRequestByIdQuery(requestId);
-        var optionalRequest = this.requestQueryService.handle(getRequestByIdQuery);
-
         if (optionalRequest.isPresent()) {
             var requestResource = RequestResourceFromEntityAssembler.toResourceFromEntity(optionalRequest.get());
             return ResponseEntity.ok(requestResource);
         } else {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.notFound().build();
         }
     }
 
@@ -107,4 +93,11 @@ public class RequestController {
         var requestResource = RequestResourceFromEntityAssembler.toResourceFromEntity(updatedRequest.get());
         return ResponseEntity.ok(requestResource);
     }
+
+    // For this controller
+    // TODO: Post a request to a task manually ( POST /api/v1/tasks/{taskId}/request )
+
+    // For another controller?
+    // TODO: Delete request endpoint ( DELETE /api/v1/groups/{groupId}/requests/{requestId} )
+    // TODO: Get requests from a member ( GET /api/v1/groups/{groupId}/members/{memberId}/requests )
 }
