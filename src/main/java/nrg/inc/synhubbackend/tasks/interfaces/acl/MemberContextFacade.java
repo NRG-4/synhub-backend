@@ -8,4 +8,5 @@ import java.util.Optional;
 public interface MemberContextFacade {
     Optional<Member> createMember();
     List<Member> getMemberByGroupId(Long groupId);
+    Optional<Member> getMemberById(Long memberId);
 }

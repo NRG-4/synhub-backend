@@ -32,4 +32,12 @@ public class ExternalMemberService {
         }
         return members;
     }
+
+    public Optional<Member> getMemberById(Long memberId) {
+        var member = this.memberContextFacade.getMemberById(memberId);
+        if (member.isEmpty()) {
+            throw new IllegalArgumentException("No member found with ID: " + memberId);
+        }
+        return member;
+    }
 }

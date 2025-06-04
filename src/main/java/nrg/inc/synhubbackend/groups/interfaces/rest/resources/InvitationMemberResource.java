@@ -1,6 +1,6 @@
 package nrg.inc.synhubbackend.groups.interfaces.rest.resources;
 
-public record UserMemberInvitationResource(
+public record InvitationMemberResource(
         Long memberId,
         String username,
         String name,

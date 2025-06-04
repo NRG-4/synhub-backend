@@ -29,4 +29,10 @@ public class MemberContextFacadeImpl implements MemberContextFacade {
         var members = memberRepository.findMembersByGroup_Id(groupId);
         return members;
     }
+
+    @Override
+    public Optional<Member> getMemberById(Long memberId) {
+        var member = memberRepository.findById(memberId);
+        return member;
+    }
 }
