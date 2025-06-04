@@ -1,12 +1,13 @@
 package nrg.inc.synhubbackend.tasks.interfaces.rest;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import nrg.inc.synhubbackend.tasks.domain.model.commands.DeleteTaskCommand;
 import nrg.inc.synhubbackend.tasks.domain.model.commands.UpdateTaskStatusCommand;
 import nrg.inc.synhubbackend.tasks.domain.model.queries.GetAllTaskByStatusQuery;
-import nrg.inc.synhubbackend.tasks.domain.model.queries.GetAllTasksQuery;
 import nrg.inc.synhubbackend.tasks.domain.model.queries.GetTaskByIdQuery;
 import nrg.inc.synhubbackend.tasks.domain.services.TaskCommandService;
 import nrg.inc.synhubbackend.tasks.domain.services.TaskQueryService;
@@ -15,6 +16,7 @@ import nrg.inc.synhubbackend.tasks.interfaces.rest.resources.UpdateTaskResource;
 import nrg.inc.synhubbackend.tasks.interfaces.rest.transform.TaskResourceFromEntityAssembler;
 import nrg.inc.synhubbackend.tasks.interfaces.rest.transform.UpdateTaskCommandFromResourceAssembler;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -44,18 +46,6 @@ public class TaskController {
 
         var taskResource = TaskResourceFromEntityAssembler.toResourceFromEntity(task.get());
         return ResponseEntity.ok(taskResource);
-    }
-
-    //get all tasks
-    @GetMapping
-    @Operation(summary = "Get all tasks", description = "Get all tasks")
-    public ResponseEntity<List<TaskResource>> getAllTasks() {
-        var getAllTasksQuery = new GetAllTasksQuery();
-        var tasks = taskQueryService.handle(getAllTasksQuery);
-        var taskResources = tasks.stream()
-                .map(TaskResourceFromEntityAssembler::toResourceFromEntity)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(taskResources);
     }
 
     @GetMapping("/status/{status}")

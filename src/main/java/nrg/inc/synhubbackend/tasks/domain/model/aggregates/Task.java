@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+import nrg.inc.synhubbackend.groups.domain.model.aggregates.Group;
 import nrg.inc.synhubbackend.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import nrg.inc.synhubbackend.tasks.domain.model.commands.CreateTaskCommand;
 import nrg.inc.synhubbackend.tasks.domain.model.commands.UpdateTaskCommand;
@@ -31,6 +32,11 @@ public class Task extends AuditableAbstractAggregateRoot<Task> {
     @ManyToOne
     @JoinColumn(name = "member_id")
     private Member member;
+
+    @Setter
+    @ManyToOne
+    @JoinColumn(name = "group_id")
+    private Group group;
 
     @Column(nullable = false)
     private Integer timesRearranged = 0;

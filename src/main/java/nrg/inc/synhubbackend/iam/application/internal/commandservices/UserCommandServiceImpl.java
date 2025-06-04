@@ -1,7 +1,7 @@
 package nrg.inc.synhubbackend.iam.application.internal.commandservices;
 
 import nrg.inc.synhubbackend.iam.application.external.outboundedservices.ExternalLeaderService;
-import nrg.inc.synhubbackend.iam.application.external.outboundedservices.ExternalMemberService;
+import nrg.inc.synhubbackend.shared.application.external.outboundedservices.ExternalMemberService;
 import nrg.inc.synhubbackend.iam.application.internal.outboundservices.hashing.HashingService;
 import nrg.inc.synhubbackend.iam.application.internal.outboundservices.tokens.TokenService;
 import nrg.inc.synhubbackend.iam.domain.model.aggregates.User;
@@ -107,7 +107,7 @@ public class UserCommandServiceImpl implements UserCommandService {
     var user = userRepository.findById(userId).get();
     var leader = externalLeaderService.createUserLeader(command);
     user.setLeader(leader.get());
-
+    leader.get().setUser(user);
     try {
       var updatedUser = userRepository.save(user);
       return Optional.of(updatedUser);
@@ -125,6 +125,7 @@ public class UserCommandServiceImpl implements UserCommandService {
     var user = userRepository.findById(userId).get();
     var member = externalMemberService.createUserMember(command);
     user.setMember(member.get());
+    member.get().setUser(user);
 
     try {
       var updatedUser = userRepository.save(user);

@@ -13,7 +13,8 @@ public class TaskResourceFromEntityAssembler {
                 entity.getCreatedAt().toString(),
                 entity.getUpdatedAt().toString(),
                 entity.getStatus().toString(),
-                TaskMemberResourceFromEntityAssembler.toResourceFromEntity(entity.getMember())
+                TaskMemberResourceFromEntityAssembler.toResourceFromEntity(entity.getMember()),
+                entity.getGroup().getId()
         );
     }
 }

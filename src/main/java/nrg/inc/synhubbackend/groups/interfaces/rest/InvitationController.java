@@ -11,8 +11,7 @@ import nrg.inc.synhubbackend.groups.domain.services.InvitationQueryService;
 import nrg.inc.synhubbackend.groups.interfaces.rest.resources.CreateInvitationRequestResource;
 import nrg.inc.synhubbackend.groups.interfaces.rest.resources.InvitationResource;
 import nrg.inc.synhubbackend.groups.interfaces.rest.transform.InvitationResourceFromEntityAssembler;
-import nrg.inc.synhubbackend.shared.application.external.outboundedservices.ExternalIamService;
-import nrg.inc.synhubbackend.tasks.domain.services.MemberQueryService;
+import nrg.inc.synhubbackend.shared.application.external.outboundedservices.ExternalMemberService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,18 +24,18 @@ import java.util.stream.Collectors;
 public class InvitationController {
     private final InvitationQueryService invitationQueryService;
     private final InvitationCommandService invitationCommandService;
-    private final ExternalIamService externalIamService;
+    private final ExternalMemberService externalMemberService;
 
-    public InvitationController(InvitationQueryService invitationQueryService, InvitationCommandService invitationCommandService, MemberQueryService memberQueryService, ExternalIamService externalIamService) {
+    public InvitationController(InvitationQueryService invitationQueryService, InvitationCommandService invitationCommandService, ExternalMemberService externalMemberService) {
         this.invitationQueryService = invitationQueryService;
         this.invitationCommandService = invitationCommandService;
-        this.externalIamService = externalIamService;
+        this.externalMemberService = externalMemberService;
     }
 
     @PostMapping
     @Operation(summary = "Create a new invitation", description = "Create a new invitation for a group")
     public ResponseEntity<InvitationResource> createInvitation(@RequestBody CreateInvitationRequestResource resource) {
-        var member = this.externalIamService.getUserByMemberId(resource.memberId());
+        var member = this.externalMemberService.getMemberById(resource.memberId());
         if (member.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
@@ -56,7 +55,7 @@ public class InvitationController {
         var invitations = this.invitationQueryService.handle(getInvitationsByGroupIdQuery);
         var invitationResources = invitations.stream()
                 .map(invitation -> {
-                    var member = this.externalIamService.getUserByMemberId(invitation.getMember().getId());
+                    var member = this.externalMemberService.getMemberById(invitation.getMember().getId());
                     return InvitationResourceFromEntityAssembler.toResourceFromEntity(invitation, member.orElse(null));
                 })
                 .collect(Collectors.toList());

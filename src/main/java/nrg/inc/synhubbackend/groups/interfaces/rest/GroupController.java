@@ -5,19 +5,33 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import nrg.inc.synhubbackend.groups.domain.model.queries.GetGroupByCodeQuery;
 import nrg.inc.synhubbackend.groups.domain.model.queries.GetGroupByMemberIdQuery;
 import nrg.inc.synhubbackend.groups.domain.services.GroupQueryService;
+import nrg.inc.synhubbackend.groups.interfaces.rest.resources.GroupMemberResource;
 import nrg.inc.synhubbackend.groups.interfaces.rest.resources.GroupResource;
+import nrg.inc.synhubbackend.groups.interfaces.rest.transform.GroupMemberResourceFromEntityAssembler;
 import nrg.inc.synhubbackend.groups.interfaces.rest.transform.GroupResourceFromEntityAssembler;
+import nrg.inc.synhubbackend.shared.application.external.outboundedservices.ExternalMemberService;
+import nrg.inc.synhubbackend.tasks.domain.model.queries.GetAllTasksByGroupIdQuery;
+import nrg.inc.synhubbackend.tasks.domain.services.TaskQueryService;
+import nrg.inc.synhubbackend.tasks.interfaces.rest.resources.TaskResource;
+import nrg.inc.synhubbackend.tasks.interfaces.rest.transform.TaskResourceFromEntityAssembler;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/api/v1/groups")
 @Tag(name = "Groups", description = "Group management API")
 public class GroupController {
     private final GroupQueryService groupQueryService;
+    private final ExternalMemberService externalMemberService;
+    private final TaskQueryService taskQueryService;
 
-    public GroupController(GroupQueryService groupQueryService) {
+    public GroupController(GroupQueryService groupQueryService, ExternalMemberService externalMemberService, TaskQueryService taskQueryService) {
         this.groupQueryService = groupQueryService;
+        this.externalMemberService = externalMemberService;
+        this.taskQueryService = taskQueryService;
     }
 
     @GetMapping("/search")
@@ -42,5 +56,26 @@ public class GroupController {
         }
         var groupResource = GroupResourceFromEntityAssembler.toResourceFromEntity(group.get());
         return ResponseEntity.ok(groupResource);
+    }
+
+    @GetMapping("{groupId}/members")
+    @Operation(summary = "Get all group members", description = "Retrieve all members of a group")
+    public ResponseEntity<List<GroupMemberResource>> getAllMembersByGroupId(@PathVariable Long groupId) {
+        var members = externalMemberService.getMembersByGroupId(groupId);
+        var memberResources = members.stream()
+                .map(GroupMemberResourceFromEntityAssembler::toResourceFromEntity)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(memberResources);
+    }
+
+    @GetMapping("{groupId}/tasks")
+    @Operation(summary = "Get all tasks by group ID", description = "Retrieve all tasks associated with a specific group ID")
+    public ResponseEntity<List<TaskResource>> getAllTasksByGroupId(@PathVariable Long groupId) {
+        var getAllTasksByGroupIdQuery = new GetAllTasksByGroupIdQuery(groupId);
+        var tasks = taskQueryService.handle(getAllTasksByGroupIdQuery);
+        var taskResources = tasks.stream()
+                .map(TaskResourceFromEntityAssembler::toResourceFromEntity)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(taskResources);
     }
 }

@@ -8,6 +8,5 @@ public record UpdateTaskCommand(
         String description,
         Date dueDate,
         Long memberId
-
 ) {
 }

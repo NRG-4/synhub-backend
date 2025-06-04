@@ -53,13 +53,13 @@ public class User extends AuditableAbstractAggregateRoot<User> {
 
     @Nullable
     @Setter
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "leader_id")
     private Leader leader;
 
     @Nullable
     @Setter
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "member_id")
     private Member member;
 
