@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import nrg.inc.synhubbackend.groups.domain.model.aggregates.Group;
+import nrg.inc.synhubbackend.iam.domain.model.aggregates.User;
 import nrg.inc.synhubbackend.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import nrg.inc.synhubbackend.tasks.domain.model.commands.CreateMemberCommand;
 
@@ -20,7 +21,10 @@ public class Member extends AuditableAbstractAggregateRoot<Member> {
 
     @OneToMany(mappedBy = "member")
     private List<Task> tasks;
-  
+
+    @OneToOne(mappedBy = "member")
+    private User user;
+
     public Member() {}
 
     public Member(CreateMemberCommand command) {

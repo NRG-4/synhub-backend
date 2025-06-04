@@ -1,10 +1,12 @@
 package nrg.inc.synhubbackend.groups.domain.model.aggregates;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import nrg.inc.synhubbackend.iam.domain.model.aggregates.User;
 import nrg.inc.synhubbackend.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 
 import java.sql.Time;
@@ -17,6 +19,9 @@ public class Leader extends AuditableAbstractAggregateRoot<Leader> {
     Time averageSolutionTime;
 
     Integer solvedRequests;
+
+    @OneToOne(mappedBy = "leader")
+    private User user;
 
     public Leader() {
         this.averageSolutionTime = new Time(0);
