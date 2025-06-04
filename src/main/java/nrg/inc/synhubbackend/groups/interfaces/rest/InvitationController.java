@@ -11,9 +11,7 @@ import nrg.inc.synhubbackend.groups.domain.services.InvitationQueryService;
 import nrg.inc.synhubbackend.groups.interfaces.rest.resources.CreateInvitationRequestResource;
 import nrg.inc.synhubbackend.groups.interfaces.rest.resources.InvitationResource;
 import nrg.inc.synhubbackend.groups.interfaces.rest.transform.InvitationResourceFromEntityAssembler;
-import nrg.inc.synhubbackend.shared.application.external.outboundedservices.ExternalIamService;
 import nrg.inc.synhubbackend.shared.application.external.outboundedservices.ExternalMemberService;
-import nrg.inc.synhubbackend.tasks.domain.services.MemberQueryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

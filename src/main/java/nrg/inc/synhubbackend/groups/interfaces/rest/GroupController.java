@@ -9,14 +9,11 @@ import nrg.inc.synhubbackend.groups.interfaces.rest.resources.GroupMemberResourc
 import nrg.inc.synhubbackend.groups.interfaces.rest.resources.GroupResource;
 import nrg.inc.synhubbackend.groups.interfaces.rest.transform.GroupMemberResourceFromEntityAssembler;
 import nrg.inc.synhubbackend.groups.interfaces.rest.transform.GroupResourceFromEntityAssembler;
-import nrg.inc.synhubbackend.shared.application.external.outboundedservices.ExternalIamService;
 import nrg.inc.synhubbackend.shared.application.external.outboundedservices.ExternalMemberService;
 import nrg.inc.synhubbackend.tasks.domain.model.queries.GetAllTasksByGroupIdQuery;
 import nrg.inc.synhubbackend.tasks.domain.services.TaskQueryService;
 import nrg.inc.synhubbackend.tasks.interfaces.rest.resources.TaskResource;
-import nrg.inc.synhubbackend.tasks.interfaces.rest.resources.UserMemberResource;
 import nrg.inc.synhubbackend.tasks.interfaces.rest.transform.TaskResourceFromEntityAssembler;
-import nrg.inc.synhubbackend.tasks.interfaces.rest.transform.UserMemberResourceFromEntityAssembler;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
