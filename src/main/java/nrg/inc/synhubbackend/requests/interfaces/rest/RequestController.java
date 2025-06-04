@@ -60,7 +60,7 @@ public class RequestController {
 
     @GetMapping
     @Operation(summary = "Get a request from a task", description = "Get a request from a task id")
-    public ResponseEntity<RequestResource> getRequestByTaskId(@PathVariable long taskId) {
+    public ResponseEntity<RequestResource> getRequestByTaskId(@PathVariable Long taskId) {
         var getRequestByTaskIdQuery = new GetRequestByTaskIdQuery(taskId);
         var optionalRequest = this.requestQueryService.handle(getRequestByTaskIdQuery);
 
