@@ -3,7 +3,7 @@ package nrg.inc.synhubbackend.groups.application.internal.queryservices;
 import nrg.inc.synhubbackend.shared.application.external.outboundedservices.ExternalIamService;
 import nrg.inc.synhubbackend.groups.domain.model.aggregates.Leader;
 import nrg.inc.synhubbackend.groups.domain.model.queries.GetLeaderByIdQuery;
-import nrg.inc.synhubbackend.groups.domain.model.queries.GetUserLeaderByIdQuery;
+import nrg.inc.synhubbackend.groups.domain.model.queries.GetLeaderByUsernameQuery;
 import nrg.inc.synhubbackend.groups.domain.services.LeaderQueryService;
 import nrg.inc.synhubbackend.groups.infrastructure.persistence.jpa.repositories.LeaderRepository;
 import nrg.inc.synhubbackend.iam.domain.model.aggregates.User;
@@ -28,14 +28,20 @@ public class LeaderQueryServiceImpl implements LeaderQueryService {
     }
 
     @Override
-    public Optional<User> handle(GetUserLeaderByIdQuery query) {
-        var user = externalIamService.getUserById(query.userId());
+    public Optional<Leader> handle(GetLeaderByUsernameQuery query) {
+        var user = externalIamService.getUserByUsername(query.username());
 
         var role = user.get().getRoles().stream().findFirst().get().getName().toString();
 
         if (!role.equals("ROLE_LEADER")){
             return Optional.empty();
         }
-        return user;
+
+        var leader = user.get().getLeader();
+        if (leader == null) {
+            return Optional.empty();
+        }
+
+        return Optional.of(leader);
     }
 }

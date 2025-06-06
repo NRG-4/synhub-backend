@@ -14,6 +14,7 @@ public class ExternalIamService {
     public ExternalIamService(IamContextFacade iamContextFacade) {
         this.iamContextFacade = iamContextFacade;
     }
+
     public Optional<User> getUserByLeaderId(Long leaderId) {
         var user = this.iamContextFacade.fetchUserByLeaderId(leaderId);
         if (user.isEmpty()) {
@@ -41,5 +42,17 @@ public class ExternalIamService {
     public List<User> getUsersByGroup_Id(Long groupId) {
         var userList = this.iamContextFacade.fetchUsersByGroupId(groupId);
         return userList;
+    }
+
+    public Optional<User> getUserByUsername(String username) {
+        var userId = this.iamContextFacade.fetchUserIdByUsername(username);
+        if (userId == null || userId == 0L) {
+            throw new IllegalArgumentException("User not found for username: " + username);
+        }
+        var user = this.iamContextFacade.fetchUserById(userId);
+        if (user.isEmpty()) {
+            throw new IllegalArgumentException("User not found for userId: " + userId);
+        }
+        return user;
     }
 }
