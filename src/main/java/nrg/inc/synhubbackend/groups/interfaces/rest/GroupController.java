@@ -11,10 +11,13 @@ import nrg.inc.synhubbackend.groups.interfaces.rest.transform.GroupMemberResourc
 import nrg.inc.synhubbackend.groups.interfaces.rest.transform.GroupResourceFromEntityAssembler;
 import nrg.inc.synhubbackend.shared.application.external.outboundedservices.ExternalMemberService;
 import nrg.inc.synhubbackend.tasks.domain.model.queries.GetAllTasksByGroupIdQuery;
+import nrg.inc.synhubbackend.tasks.domain.model.queries.GetMemberByUsernameQuery;
 import nrg.inc.synhubbackend.tasks.domain.services.TaskQueryService;
 import nrg.inc.synhubbackend.tasks.interfaces.rest.resources.TaskResource;
 import nrg.inc.synhubbackend.tasks.interfaces.rest.transform.TaskResourceFromEntityAssembler;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -46,17 +49,7 @@ public class GroupController {
         return ResponseEntity.ok(groupResource);
     }
 
-    @GetMapping("/members/{memberId}")
-    @Operation(summary = "Get group by member ID", description = "Get the group associated with a specific member ID")
-    public ResponseEntity<GroupResource> getGroupByMemberId(@PathVariable Long memberId) {
-        var getGroupByMemberIdQuery = new GetGroupByMemberIdQuery(memberId);
-        var group = this.groupQueryService.handle(getGroupByMemberIdQuery);
-        if (group.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        var groupResource = GroupResourceFromEntityAssembler.toResourceFromEntity(group.get());
-        return ResponseEntity.ok(groupResource);
-    }
+
 
     @GetMapping("{groupId}/members")
     @Operation(summary = "Get all group members", description = "Retrieve all members of a group")

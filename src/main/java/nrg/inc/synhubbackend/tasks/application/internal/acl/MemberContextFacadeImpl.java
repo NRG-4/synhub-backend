@@ -1,6 +1,8 @@
 package nrg.inc.synhubbackend.tasks.application.internal.acl;
 
 import nrg.inc.synhubbackend.tasks.domain.model.aggregates.Member;
+import nrg.inc.synhubbackend.tasks.domain.model.queries.GetMemberByUsernameQuery;
+import nrg.inc.synhubbackend.tasks.domain.services.MemberQueryService;
 import nrg.inc.synhubbackend.tasks.infrastructure.persistence.jpa.repositories.MemberRepository;
 import nrg.inc.synhubbackend.tasks.interfaces.acl.MemberContextFacade;
 import org.springframework.stereotype.Service;
