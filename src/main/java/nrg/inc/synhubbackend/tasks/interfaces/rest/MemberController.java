@@ -10,6 +10,8 @@ import nrg.inc.synhubbackend.tasks.interfaces.rest.resources.MemberResource;
 import nrg.inc.synhubbackend.tasks.interfaces.rest.transform.MemberResourceFromEntityAssembler;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,9 +27,9 @@ public class MemberController {
 
     @GetMapping("/details")
     @Operation(summary = "Get member details by authentication", description = "Fetches the details of the authenticated member.")
-    public ResponseEntity<MemberResource> getMemberByAuthentication(Authentication authentication) {
+    public ResponseEntity<MemberResource> getMemberByAuthentication(@AuthenticationPrincipal UserDetails userDetails) {
 
-        String username = authentication.getName();
+        String username = userDetails.getUsername();
 
         var getMemberByUsernameQuery = new GetMemberByUsernameQuery(username);
 

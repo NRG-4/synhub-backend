@@ -16,6 +16,8 @@ import nrg.inc.synhubbackend.tasks.interfaces.rest.transform.TaskResourceFromEnt
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -61,8 +63,8 @@ public class TaskMemberController {
 
     @GetMapping("/tasks")
     @Operation(summary = "Get all tasks by authenticated member", description = "Fetches all tasks for the authenticated member.")
-    public ResponseEntity<List<TaskResource>> getAllTasksByMemberAuthenticated(Authentication authentication) {
-        String username = authentication.getName();
+    public ResponseEntity<List<TaskResource>> getAllTasksByMemberAuthenticated(@AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails.getUsername();
 
         var getMemberByUsernameQuery = new GetMemberByUsernameQuery(username);
 

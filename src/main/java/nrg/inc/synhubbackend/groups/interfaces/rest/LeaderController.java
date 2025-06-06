@@ -9,6 +9,8 @@ import nrg.inc.synhubbackend.groups.interfaces.rest.resources.LeaderResource;
 import nrg.inc.synhubbackend.groups.interfaces.rest.transform.LeaderResourceFromEntityAssembler;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -24,9 +26,9 @@ public class LeaderController {
 
     @GetMapping("/details")
     @Operation(summary = "Get leader details by authentication", description = "Fetches the details of the authenticated leader.")
-    public ResponseEntity<LeaderResource> getLeaderByAuthentication(Authentication authentication) {
+    public ResponseEntity<LeaderResource> getLeaderByAuthentication(@AuthenticationPrincipal UserDetails userDetails) {
 
-        String username = authentication.getName();
+        String username = userDetails.getUsername();
 
         var getLeaderByUsernameQuery = new GetLeaderByUsernameQuery(username);
 
