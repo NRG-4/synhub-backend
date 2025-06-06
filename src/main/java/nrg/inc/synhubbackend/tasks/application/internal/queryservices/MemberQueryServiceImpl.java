@@ -29,7 +29,7 @@ public class MemberQueryServiceImpl implements MemberQueryService {
 
     @Override
     public Optional<Member> handle(GetMemberByIdQuery query) {
-        return Optional.empty();
+        return memberRepository.findById(query.memberId());
     }
 
     @Override
