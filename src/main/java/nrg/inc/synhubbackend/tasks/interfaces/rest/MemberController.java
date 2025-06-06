@@ -62,6 +62,9 @@ public class MemberController {
         String username = userDetails.getUsername();
         var getMemberByUsernameQuery = new GetMemberByUsernameQuery(username);
         var member = this.memberQueryService.handle(getMemberByUsernameQuery);
+        if (member.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
         var getGroupByMemberIdQuery = new GetGroupByMemberIdQuery(member.get().getId());
         var group = this.groupQueryService.handle(getGroupByMemberIdQuery);
         if (group.isEmpty()) {
