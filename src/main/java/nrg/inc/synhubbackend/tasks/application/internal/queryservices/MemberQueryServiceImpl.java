@@ -6,9 +6,11 @@ import nrg.inc.synhubbackend.tasks.domain.model.aggregates.Member;
 import nrg.inc.synhubbackend.tasks.domain.model.queries.GetAllMembersQuery;
 import nrg.inc.synhubbackend.tasks.domain.model.queries.GetMemberByIdQuery;
 import nrg.inc.synhubbackend.tasks.domain.model.queries.GetMembersByGroupIdQuery;
-import nrg.inc.synhubbackend.tasks.domain.model.queries.GetUserMemberById;
+import nrg.inc.synhubbackend.tasks.domain.model.queries.GetMemberByUsernameQuery;
 import nrg.inc.synhubbackend.tasks.domain.services.MemberQueryService;
 import nrg.inc.synhubbackend.tasks.infrastructure.persistence.jpa.repositories.MemberRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,8 +33,8 @@ public class MemberQueryServiceImpl implements MemberQueryService {
     }
 
     @Override
-    public Optional<User> handle(GetUserMemberById query) {
-        var user = this.externalIamService.getUserById(query.userId());
+    public Optional<Member> handle(GetMemberByUsernameQuery query) {
+        var user = this.externalIamService.getUserByUsername(query.username());
 
         var role = user.get().getRoles().stream().findFirst().get().getName().toString();
 
@@ -40,7 +42,11 @@ public class MemberQueryServiceImpl implements MemberQueryService {
             return Optional.empty();
         }
 
-        return user;
+        var member = user.get().getMember();
+        if (member == null) {
+            return Optional.empty();
+        }
+        return Optional.of(member);
     }
 
     @Override

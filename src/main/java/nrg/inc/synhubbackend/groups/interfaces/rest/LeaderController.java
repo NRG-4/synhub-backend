@@ -12,21 +12,19 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(value = "/api/v1/leader/details")
+@RequestMapping(value = "/api/v1/leader")
 @Tag(name = "Leaders", description = "Leader management API")
 public class LeaderController {
 
     private final LeaderQueryService leaderQueryService;
-    private final LeaderCommandService leaderCommandService;
 
-    public LeaderController(LeaderQueryService leaderQueryService, LeaderCommandService leaderCommandService) {
+    public LeaderController(LeaderQueryService leaderQueryService) {
         this.leaderQueryService = leaderQueryService;
-        this.leaderCommandService = leaderCommandService;
     }
 
-    @GetMapping
+    @GetMapping("/details")
     @Operation(summary = "Get leader details by authentication", description = "Fetches the details of the authenticated leader.")
-    public ResponseEntity<LeaderResource> getLeaderById(Authentication authentication) {
+    public ResponseEntity<LeaderResource> getLeaderByAuthentication(Authentication authentication) {
 
         String username = authentication.getName();
 
