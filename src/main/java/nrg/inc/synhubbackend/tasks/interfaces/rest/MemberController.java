@@ -9,7 +9,6 @@ import nrg.inc.synhubbackend.groups.interfaces.rest.resources.GroupResource;
 import nrg.inc.synhubbackend.groups.interfaces.rest.transform.GroupResourceFromEntityAssembler;
 import nrg.inc.synhubbackend.tasks.domain.model.queries.GetAllTasksByMemberId;
 import nrg.inc.synhubbackend.tasks.domain.model.queries.GetMemberByUsernameQuery;
-import nrg.inc.synhubbackend.tasks.domain.services.MemberCommandService;
 import nrg.inc.synhubbackend.tasks.domain.services.MemberQueryService;
 import nrg.inc.synhubbackend.tasks.domain.services.TaskQueryService;
 import nrg.inc.synhubbackend.tasks.interfaces.rest.resources.MemberResource;
@@ -17,11 +16,11 @@ import nrg.inc.synhubbackend.tasks.interfaces.rest.resources.TaskResource;
 import nrg.inc.synhubbackend.tasks.interfaces.rest.transform.MemberResourceFromEntityAssembler;
 import nrg.inc.synhubbackend.tasks.interfaces.rest.transform.TaskResourceFromEntityAssembler;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.stream.Collectors;
 

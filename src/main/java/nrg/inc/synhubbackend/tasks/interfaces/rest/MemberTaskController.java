@@ -17,6 +17,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -56,5 +58,35 @@ public class MemberTaskController {
                 .map(TaskResourceFromEntityAssembler::toResourceFromEntity)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(taskResources);
+    }
+
+    @GetMapping("/{memberId}/tasks/next")
+    @Operation(summary = "Get the next task by member id", description = "Get the next task by member id")
+    public ResponseEntity<TaskResource> getLastNextByMemberId(@PathVariable Long memberId) {
+
+        var getAllTasksByMemberId = new GetAllTasksByMemberId(memberId);
+
+        var tasks = taskQueryService.handle(getAllTasksByMemberId);
+
+        if (tasks.isEmpty()) return ResponseEntity.notFound().build();
+
+        var now = LocalDateTime.now();
+
+        var nextTask = tasks.stream()
+                .filter(task -> {
+                    if (task.getDueDate() == null) return false;
+                    LocalDateTime dueDate = task.getDueDate().toInstant()
+                            .atZone(ZoneId.systemDefault())
+                            .toLocalDateTime();
+                    return !dueDate.isBefore(now);
+                })
+                .min((t1, t2) -> {
+                    LocalDateTime d1 = t1.getDueDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+                    LocalDateTime d2 = t2.getDueDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+                    return d1.compareTo(d2);
+                });
+
+        var taskResource = TaskResourceFromEntityAssembler.toResourceFromEntity(nextTask.get());
+        return ResponseEntity.ok(taskResource);
     }
 }
