@@ -8,6 +8,7 @@ import nrg.inc.synhubbackend.groups.domain.services.GroupQueryService;
 import nrg.inc.synhubbackend.groups.interfaces.rest.resources.GroupResource;
 import nrg.inc.synhubbackend.groups.interfaces.rest.transform.GroupResourceFromEntityAssembler;
 import nrg.inc.synhubbackend.tasks.domain.model.queries.GetAllTasksByMemberId;
+import nrg.inc.synhubbackend.tasks.domain.model.queries.GetMemberByIdQuery;
 import nrg.inc.synhubbackend.tasks.domain.model.queries.GetMemberByUsernameQuery;
 import nrg.inc.synhubbackend.tasks.domain.services.MemberQueryService;
 import nrg.inc.synhubbackend.tasks.domain.services.TaskQueryService;
@@ -52,6 +53,18 @@ public class MemberController {
 
         var memberResource = MemberResourceFromEntityAssembler.toResourceFromEntity(member.get());
 
+        return ResponseEntity.ok(memberResource);
+    }
+
+    @GetMapping("/details/{memberId}")
+    @Operation(summary = "Get member details by member ID", description = "Fetches the details of a member by their ID.")
+    public ResponseEntity<MemberResource> getMemberById(@PathVariable Long memberId) {
+        var getMemberByIdQuery = new GetMemberByIdQuery(memberId);
+        var member = this.memberQueryService.handle(getMemberByIdQuery);
+        if (member.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        var memberResource = MemberResourceFromEntityAssembler.toResourceFromEntity(member.get());
         return ResponseEntity.ok(memberResource);
     }
 

@@ -6,6 +6,7 @@ import nrg.inc.synhubbackend.tasks.interfaces.rest.resources.MemberResource;
 public class MemberResourceFromEntityAssembler {
     public static MemberResource toResourceFromEntity(Member entity) {
         return new MemberResource(
+                entity.getId(),
                 entity.getUser().getUsername(),
                 entity.getUser().getName(),
                 entity.getUser().getSurname(),
