@@ -32,7 +32,7 @@ public class TaskQueryServiceImpl implements TaskQueryService {
 
     @Override
     public List<Task> handle(GetAllTasksByMemberId query) {
-        return this.taskRepository.findByMemberId(query.memberId());
+        return this.taskRepository.findByMember_Id(query.memberId());
     }
 
     @Override

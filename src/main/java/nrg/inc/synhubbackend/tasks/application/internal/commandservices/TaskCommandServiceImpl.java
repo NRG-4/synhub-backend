@@ -2,10 +2,7 @@ package nrg.inc.synhubbackend.tasks.application.internal.commandservices;
 
 import nrg.inc.synhubbackend.groups.infrastructure.persistence.jpa.repositories.GroupRepository;
 import nrg.inc.synhubbackend.tasks.domain.model.aggregates.Task;
-import nrg.inc.synhubbackend.tasks.domain.model.commands.CreateTaskCommand;
-import nrg.inc.synhubbackend.tasks.domain.model.commands.DeleteTaskCommand;
-import nrg.inc.synhubbackend.tasks.domain.model.commands.UpdateTaskCommand;
-import nrg.inc.synhubbackend.tasks.domain.model.commands.UpdateTaskStatusCommand;
+import nrg.inc.synhubbackend.tasks.domain.model.commands.*;
 import nrg.inc.synhubbackend.tasks.domain.services.TaskCommandService;
 import nrg.inc.synhubbackend.tasks.infrastructure.persistence.jpa.repositories.MemberRepository;
 import nrg.inc.synhubbackend.tasks.infrastructure.persistence.jpa.repositories.TaskRepository;
@@ -143,6 +140,30 @@ public class TaskCommandServiceImpl implements TaskCommandService {
             return Optional.of(updatedTask);
         } catch (Exception e){
             throw new IllegalArgumentException("Error updating task status: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void handle(DeleteTasksByMemberId command) {
+        var memberId = command.memberId();
+        if(!this.memberRepository.existsById(memberId)) {
+            throw new IllegalArgumentException("Member with id " + memberId + " does not exist");
+        }
+        try {
+            var tasks = this.taskRepository.findByMember_Id(memberId);
+            if (tasks.isEmpty()) {
+                return;
+            }
+            for (var task : tasks) {
+                var member = task.getMember();
+                if (member != null) {
+                    member.removeTask(task);
+                    this.memberRepository.save(member);
+                }
+                this.taskRepository.delete(task);
+            }
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Error deleting tasks for member: " + e.getMessage());
         }
     }
 }
