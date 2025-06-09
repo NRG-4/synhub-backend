@@ -2,6 +2,7 @@ package nrg.inc.synhubbackend.groups.interfaces.rest;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import nrg.inc.synhubbackend.groups.application.external.ExternalTasksService;
 import nrg.inc.synhubbackend.groups.domain.model.commands.CreateGroupCommand;
 import nrg.inc.synhubbackend.groups.domain.model.commands.DeleteGroupCommand;
 import nrg.inc.synhubbackend.groups.domain.model.commands.RemoveMemberFromGroupCommand;
@@ -30,11 +31,13 @@ public class LeaderGroupController {
     private final GroupQueryService groupQueryService;
     private final GroupCommandService groupCommandService;
     private final LeaderQueryService leaderQueryService;
+    private final ExternalTasksService externalTasksService;
 
-    public LeaderGroupController(GroupQueryService groupQueryService, GroupCommandService groupCommandService, LeaderQueryService leaderQueryService) {
+    public LeaderGroupController(GroupQueryService groupQueryService, GroupCommandService groupCommandService, LeaderQueryService leaderQueryService, ExternalTasksService externalTasksService) {
         this.groupQueryService = groupQueryService;
         this.groupCommandService = groupCommandService;
         this.leaderQueryService = leaderQueryService;
+        this.externalTasksService = externalTasksService;
     }
 
     @PostMapping
@@ -144,6 +147,8 @@ public class LeaderGroupController {
         if (leader.isEmpty()) return ResponseEntity.notFound().build();
 
         Long leaderId = leader.get().getId();
+
+        externalTasksService.deleteTasksByMemberId(memberId);
 
         var removeMemberFromGroupCommand = new RemoveMemberFromGroupCommand(leaderId, memberId);
 
