@@ -3,6 +3,8 @@ package nrg.inc.synhubbackend.shared.application.external.outboundedservices;
 import nrg.inc.synhubbackend.iam.domain.model.commands.CreateUserMemberCommand;
 import nrg.inc.synhubbackend.tasks.domain.model.aggregates.Member;
 import nrg.inc.synhubbackend.tasks.interfaces.acl.MemberContextFacade;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

@@ -34,6 +34,7 @@ public class User extends AuditableAbstractAggregateRoot<User> {
     private String surname;
 
     @NotBlank
+    @Column(length = 1024)
     private String imgUrl;
 
     @NotBlank

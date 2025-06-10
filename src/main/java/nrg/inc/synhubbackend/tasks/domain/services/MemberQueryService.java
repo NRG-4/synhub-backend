@@ -5,7 +5,7 @@ import nrg.inc.synhubbackend.tasks.domain.model.aggregates.Member;
 import nrg.inc.synhubbackend.tasks.domain.model.queries.GetAllMembersQuery;
 import nrg.inc.synhubbackend.tasks.domain.model.queries.GetMemberByIdQuery;
 import nrg.inc.synhubbackend.tasks.domain.model.queries.GetMembersByGroupIdQuery;
-import nrg.inc.synhubbackend.tasks.domain.model.queries.GetUserMemberById;
+import nrg.inc.synhubbackend.tasks.domain.model.queries.GetMemberByUsernameQuery;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,7 +26,7 @@ public interface MemberQueryService {
      * @param query the query containing the user ID
      * @return an Optional containing the User if found, or empty if not found
      */
-    Optional<User> handle(GetUserMemberById query);
+    Optional<Member> handle(GetMemberByUsernameQuery query);
 
     /**
      * Retrieves all members.
