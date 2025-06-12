@@ -1,15 +1,14 @@
 package nrg.inc.synhubbackend.requests.interfaces.rest;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import nrg.inc.synhubbackend.requests.domain.model.queries.GetRequestByIdQuery;
+import nrg.inc.synhubbackend.requests.domain.model.queries.GetRequestByTaskIdQuery;
 import nrg.inc.synhubbackend.requests.domain.model.valueobjects.RequestType;
 import nrg.inc.synhubbackend.requests.domain.services.RequestCommandService;
 import nrg.inc.synhubbackend.requests.domain.services.RequestQueryService;
 import nrg.inc.synhubbackend.requests.interfaces.rest.resources.CreateRequestResource;
 import nrg.inc.synhubbackend.requests.interfaces.rest.resources.RequestResource;
-import nrg.inc.synhubbackend.requests.interfaces.rest.resources.UpdateRequestStatusResource;
 import nrg.inc.synhubbackend.requests.interfaces.rest.transform.CreateRequestCommandFromResourceAssembler;
 import nrg.inc.synhubbackend.requests.interfaces.rest.transform.RequestResourceFromEntityAssembler;
 import nrg.inc.synhubbackend.requests.interfaces.rest.transform.UpdateRequestCommandFromResourceAssembler;
@@ -20,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST})
 @RestController
-@RequestMapping(value = "/api/v1/requests", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/api/v1/tasks/{taskId}/request", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Request", description = "Request management API")
 public class RequestController {
 
@@ -33,6 +32,7 @@ public class RequestController {
     }
 
     @PostMapping
+    @Operation(summary = "Create a new request", description = "Create a new request")
     public ResponseEntity<RequestResource> createRequest(@RequestBody CreateRequestResource resource) {
         try {
             RequestType.fromString(resource.requestType());
@@ -50,32 +50,54 @@ public class RequestController {
         var getRequestByIdQuery = new GetRequestByIdQuery(requestId);
         var optionalRequest = this.requestQueryService.handle(getRequestByIdQuery);
 
+        if (optionalRequest.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
         var requestResource = RequestResourceFromEntityAssembler.toResourceFromEntity(optionalRequest.get());
         return new ResponseEntity<>(requestResource, HttpStatus.CREATED);
     }
 
-    @GetMapping("/{requestId}")
-    public ResponseEntity<RequestResource> getRequestById(@PathVariable Long requestId) {
-        var getRequestByIdQuery = new GetRequestByIdQuery(requestId);
-        var optionalRequest = this.requestQueryService.handle(getRequestByIdQuery);
+    @GetMapping
+    @Operation(summary = "Get a request from a task", description = "Get a request from a task id")
+    public ResponseEntity<RequestResource> getRequestByTaskId(@PathVariable Long taskId) {
+        var getRequestByTaskIdQuery = new GetRequestByTaskIdQuery(taskId);
+        var optionalRequest = this.requestQueryService.handle(getRequestByTaskIdQuery);
 
         if (optionalRequest.isPresent()) {
             var requestResource = RequestResourceFromEntityAssembler.toResourceFromEntity(optionalRequest.get());
             return ResponseEntity.ok(requestResource);
         } else {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.notFound().build();
         }
     }
 
-    @PutMapping("/{requestId}/status")
-    public ResponseEntity<RequestResource> updateRequestStatus(@PathVariable Long requestId, @RequestBody UpdateRequestStatusResource resource) {
-            var updateRequestCommand = UpdateRequestCommandFromResourceAssembler.toCommandFromResource(requestId, resource.requestStatus());
-            var optionalRequest = this.requestCommandService.handle(updateRequestCommand);
+    @PutMapping("/status/{status}")
+    @Operation(summary = "Update a request status from a task", description = "Update the status of a request from a task")
+    public ResponseEntity<RequestResource> updateRequestStatus(@PathVariable Long taskId, @PathVariable String status) {
+        var getRequestByTaskIdQuery = new GetRequestByTaskIdQuery(taskId);
+        var optionalRequest = this.requestQueryService.handle(getRequestByTaskIdQuery);
 
-        if(optionalRequest.isEmpty()) {
+        if (optionalRequest.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
-        var requestResource = RequestResourceFromEntityAssembler.toResourceFromEntity(optionalRequest.get());
+
+        var requestId = optionalRequest.get().getId();
+        var updateRequestCommand = UpdateRequestCommandFromResourceAssembler.toCommandFromResource(requestId, status);
+        var updatedRequest = this.requestCommandService.handle(updateRequestCommand);
+
+        if (updatedRequest.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        var requestResource = RequestResourceFromEntityAssembler.toResourceFromEntity(updatedRequest.get());
         return ResponseEntity.ok(requestResource);
     }
+
+    // For this controller
+    // TODO: Post a request to a task manually ( POST /api/v1/tasks/{taskId}/request )
+
+    // For another controller?
+    // TODO: Delete request endpoint ( DELETE /api/v1/groups/{groupId}/requests/{requestId} )
+    // TODO: Get requests from a member ( GET /api/v1/groups/{groupId}/members/{memberId}/requests )
 }
