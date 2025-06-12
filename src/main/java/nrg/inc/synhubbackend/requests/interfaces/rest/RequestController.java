@@ -33,14 +33,14 @@ public class RequestController {
 
     @PostMapping
     @Operation(summary = "Create a new request", description = "Create a new request")
-    public ResponseEntity<RequestResource> createRequest(@RequestBody CreateRequestResource resource) {
+    public ResponseEntity<RequestResource> createRequest(@PathVariable Long taskId, @RequestBody CreateRequestResource resource) {
         try {
             RequestType.fromString(resource.requestType());
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
 
-        var createRequestCommand = CreateRequestCommandFromResourceAssembler.toCommandFromResource(resource);
+        var createRequestCommand = CreateRequestCommandFromResourceAssembler.toCommandFromResource(resource, taskId);
         var requestId = requestCommandService.handle(createRequestCommand);
 
         if(requestId.equals(0L)) {
@@ -94,10 +94,7 @@ public class RequestController {
         return ResponseEntity.ok(requestResource);
     }
 
-    // For this controller
-    // TODO: Post a request to a task manually ( POST /api/v1/tasks/{taskId}/request )
-
     // For another controller?
     // TODO: Delete request endpoint ( DELETE /api/v1/groups/{groupId}/requests/{requestId} )
-    // TODO: Get requests from a member ( GET /api/v1/groups/{groupId}/members/{memberId}/requests )
+    // TODO: Get requests from a member ( GET /api/v1/members/{memberId}/requests )
 }
