@@ -36,50 +36,6 @@ public class TaskMetricsServiceImpl implements TaskMetricsService {
     }
 
     @Override
-    public AvgDevelopmentTimeResource getAvgDevTime(Long memberId) {
-        List<Task> tasks = taskRepository.findAll().stream()
-                .filter(t -> t.getMember() != null && t.getMember().getId().equals(memberId))
-                .filter(t -> t.getStatus() == TaskStatus.COMPLETED)
-                .collect(Collectors.toList());
-
-        double avg = tasks.stream()
-                .mapToLong(Task::getTimePassed)
-                .average()
-                .orElse(0);
-
-        return new AvgDevelopmentTimeResource("AVG_DEV_TIME", avg / (1000 * 60 * 60 * 24),
-                Map.of("taskCount", tasks.size())
-        );
-    }
-
-    @Override
-    public AvgSolutionTimeResource getAvgSolutionTime(Long leaderId) {
-        List<User> users = userRepository.findAll();
-
-        List<Task> leaderTasks = users.stream()
-                .filter(u -> u.getLeader() != null && u.getLeader().getId().equals(leaderId))
-                .flatMap(u -> {
-                    var member = u.getMember();
-                    if (member != null) {
-                        return taskRepository.findAll().stream()
-                                .filter(t -> t.getMember() != null && t.getMember().getId().equals(member.getId()));
-                    }
-                    return Stream.empty();
-                })
-                .filter(task -> task.getStatus() == TaskStatus.COMPLETED)
-                .collect(Collectors.toList());
-
-        double avg = leaderTasks.stream()
-                .mapToLong(Task::getTimePassed)
-                .average()
-                .orElse(0);
-
-        return new AvgSolutionTimeResource("AVG_SOLUTION_TIME", avg / (1000 * 60 * 60 * 24),
-                Map.of("completedTasks", leaderTasks.size())
-        );
-    }
-
-    @Override
     public AvgCompletionTimeResource getAvgCompletionTime(Long leaderId) {
         var groupOpt = groupQueryService.handle(new GetGroupByLeaderIdQuery(leaderId));
         if (groupOpt.isEmpty()) {

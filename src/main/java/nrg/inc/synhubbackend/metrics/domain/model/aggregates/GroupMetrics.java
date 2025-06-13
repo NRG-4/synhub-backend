@@ -1,5 +1,12 @@
 package nrg.inc.synhubbackend.metrics.domain.model.aggregates;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
 public class GroupMetrics {
     private Long groupId;
     private int memberCount;
@@ -7,13 +14,5 @@ public class GroupMetrics {
     public GroupMetrics(Long groupId, int memberCount) {
         this.groupId = groupId;
         this.memberCount = memberCount;
-    }
-
-    public Long getGroupId() {
-        return groupId;
-    }
-
-    public int getMemberCount() {
-        return memberCount;
     }
 }

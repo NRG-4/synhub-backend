@@ -1,4 +1,3 @@
-// src/main/java/nrg/inc/synhubbackend/metrics/interfaces/rest/MetricsController.java
 package nrg.inc.synhubbackend.metrics.interfaces.rest;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,17 +32,21 @@ public class MetricsController {
     }
 
     @Operation(
-            summary = "Get time passed for a completed task",
-            description = "Returns the time passed in milliseconds for a completed task.",
-            tags = {"Metrics"}
+        summary = "Get time passed for a completed task",
+        description = "Returns the time passed in milliseconds for a completed task.",
+        tags = {"Metrics", "Tasks"}
     )
     @GetMapping("/task/{taskId}/time-passed")
     public TaskTimePassedResource getTaskTimePassed(@PathVariable Long taskId) {
         return taskMetricsService.getTaskTimePassed(taskId);
     }
 
+    @Operation(
+        summary = "Get task overview for group",
+        description = "Returns a summary of task statuses for the authenticated leader's group.",
+        tags = {"Metrics", "Tasks"}
+    )
     @GetMapping("/tasks/overview")
-    @Operation(summary = "Get task overview for group", description = "Returns general task status count for a group")
     public ResponseEntity<TaskOverviewResource> getTaskOverview(@AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
         var leader = leaderQueryService.handle(new GetLeaderByUsernameQuery(username));
@@ -53,8 +56,12 @@ public class MetricsController {
         return ResponseEntity.ok(taskMetricsService.getTaskOverview(group.get().getId()));
     }
 
+    @Operation(
+        summary = "Get task distribution for group",
+        description = "Returns the number of tasks assigned to each member in the authenticated leader's group.",
+        tags = {"Metrics", "Tasks"}
+    )
     @GetMapping("/tasks/distribution")
-    @Operation(summary = "Get task distribution for group", description = "Returns the number of tasks per member in a group")
     public ResponseEntity<TaskDistributionResource> getTaskDistribution(@AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
         var leader = leaderQueryService.handle(new GetLeaderByUsernameQuery(username));
@@ -64,8 +71,12 @@ public class MetricsController {
         return ResponseEntity.ok(taskMetricsService.getTaskDistribution(group.get().getId()));
     }
 
+    @Operation(
+        summary = "Get rescheduled tasks for group",
+        description = "Returns the count of rescheduled vs non-rescheduled tasks for the authenticated leader's group.",
+        tags = {"Metrics", "Tasks"}
+    )
     @GetMapping("/tasks/rescheduled")
-    @Operation(summary = "Get rescheduled tasks", description = "Returns the count of rescheduled vs non-rescheduled tasks")
     public ResponseEntity<RescheduledTasksResource> getRescheduledTasks(@AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
         var leader = leaderQueryService.handle(new GetLeaderByUsernameQuery(username));
@@ -75,8 +86,12 @@ public class MetricsController {
         return ResponseEntity.ok(taskMetricsService.getRescheduledTasks(group.get().getId()));
     }
 
+    @Operation(
+        summary = "Get average completion time for group",
+        description = "Returns the average time (in days) it takes to complete tasks in the authenticated leader's group.",
+        tags = {"Metrics", "Tasks"}
+    )
     @GetMapping("/tasks/avg-completion-time")
-    @Operation(summary = "Get average completion time", description = "Returns the average time spent on tasks by a member or leader")
     public ResponseEntity<AvgCompletionTimeResource> getAvgCompletionTime(@AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
         var leader = leaderQueryService.handle(new GetLeaderByUsernameQuery(username));
