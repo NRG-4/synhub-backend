@@ -10,7 +10,12 @@ import java.util.Map;
 public class TaskDistributionResource {
     private String type;
     private int value;
-    private Map<String, Integer> details;
-    private String context;
-    private String summary;
+    private Map<String, MemberTaskInfo> details;
+
+    @Getter
+    @AllArgsConstructor
+    public static class MemberTaskInfo {
+        private String memberName;
+        private int taskCount;
+    }
 }
