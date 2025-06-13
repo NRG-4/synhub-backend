@@ -36,11 +36,10 @@ public class TaskMetricsQueryServiceImpl implements TaskMetricsQueryService {
     public TaskTimePassedResource handle(GetTaskTimePassedQuery query) {
         List<Task> memberTasks = taskRepository.findByMember_Id(query.memberId());
 
-        long totalTimePassed = memberTasks.stream()
-                .mapToLong(Task::getTimePassed)
-                .sum();
+        double avgTimePassed = memberTasks.isEmpty() ? 0 :
+            memberTasks.stream().mapToLong(Task::getTimePassed).average().orElse(0);
 
-        return new TaskTimePassedResource(query.memberId(), totalTimePassed);
+        return new TaskTimePassedResource(query.memberId(), (long) avgTimePassed);
     }
 
     @Override
