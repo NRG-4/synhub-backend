@@ -5,7 +5,5 @@ import java.util.Map;
 public record AvgDevTimeResource(
         String type,
         double value,
-        Map<String, Integer> details,
-        String context,
-        String summary
+        Map<String, Integer> details
 ) {}
