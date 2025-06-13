@@ -9,7 +9,7 @@ import nrg.inc.synhubbackend.groups.domain.services.GroupQueryService;
 import nrg.inc.synhubbackend.groups.domain.services.LeaderQueryService;
 import nrg.inc.synhubbackend.metrics.domain.model.services.GroupMetricsService;
 import nrg.inc.synhubbackend.metrics.domain.model.services.TaskMetricsService;
-import nrg.inc.synhubbackend.metrics.interfaces.resources.*;
+import nrg.inc.synhubbackend.metrics.interfaces.rest.resources.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
