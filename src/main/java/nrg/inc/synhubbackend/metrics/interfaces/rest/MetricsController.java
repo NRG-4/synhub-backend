@@ -14,6 +14,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/api/v1/metrics")
 @Tag(name = "Metrics", description = "Provides access to analytics and group metrics")
@@ -27,6 +29,14 @@ public class MetricsController {
         this.taskMetricsQueryService = taskMetricsQueryService;
         this.leaderQueryService = leaderQueryService;
         this.groupQueryService = groupQueryService;
+    }
+
+    private Optional<Long> getGroupIdFromUser(@AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails.getUsername();
+        var leader = leaderQueryService.handle(new GetLeaderByUsernameQuery(username));
+        if (leader.isEmpty()) return Optional.empty();
+        var group = groupQueryService.handle(new GetGroupByLeaderIdQuery(leader.get().getId()));
+        return group.map(g -> g.getId());
     }
 
     @GetMapping("/task/member/{memberId}/time-passed")
@@ -48,12 +58,9 @@ public class MetricsController {
         tags = {"Metrics", "Tasks"}
     )
     public ResponseEntity<TaskOverviewResource> getTaskOverview(@AuthenticationPrincipal UserDetails userDetails) {
-        String username = userDetails.getUsername();
-        var leader = leaderQueryService.handle(new GetLeaderByUsernameQuery(username));
-        if (leader.isEmpty()) return ResponseEntity.notFound().build();
-        var group = groupQueryService.handle(new GetGroupByLeaderIdQuery(leader.get().getId()));
-        if (group.isEmpty()) return ResponseEntity.notFound().build();
-        var query = new GetTaskOverviewQuery(group.get().getId());
+        var groupIdOpt = getGroupIdFromUser(userDetails);
+        if (groupIdOpt.isEmpty()) return ResponseEntity.notFound().build();
+        var query = new GetTaskOverviewQuery(groupIdOpt.get());
         var resource = taskMetricsQueryService.handle(query);
         return ResponseEntity.ok(resource);
     }
@@ -65,12 +72,9 @@ public class MetricsController {
         tags = {"Metrics", "Tasks"}
     )
     public ResponseEntity<TaskDistributionResource> getTaskDistribution(@AuthenticationPrincipal UserDetails userDetails) {
-        String username = userDetails.getUsername();
-        var leader = leaderQueryService.handle(new GetLeaderByUsernameQuery(username));
-        if (leader.isEmpty()) return ResponseEntity.notFound().build();
-        var group = groupQueryService.handle(new GetGroupByLeaderIdQuery(leader.get().getId()));
-        if (group.isEmpty()) return ResponseEntity.notFound().build();
-        var query = new GetTaskDistributionQuery(group.get().getId());
+        var groupIdOpt = getGroupIdFromUser(userDetails);
+        if (groupIdOpt.isEmpty()) return ResponseEntity.notFound().build();
+        var query = new GetTaskDistributionQuery(groupIdOpt.get());
         var resource = taskMetricsQueryService.handle(query);
         return ResponseEntity.ok(resource);
     }
@@ -82,12 +86,9 @@ public class MetricsController {
         tags = {"Metrics", "Tasks"}
     )
     public ResponseEntity<RescheduledTasksResource> getRescheduledTasks(@AuthenticationPrincipal UserDetails userDetails) {
-        String username = userDetails.getUsername();
-        var leader = leaderQueryService.handle(new GetLeaderByUsernameQuery(username));
-        if (leader.isEmpty()) return ResponseEntity.notFound().build();
-        var group = groupQueryService.handle(new GetGroupByLeaderIdQuery(leader.get().getId()));
-        if (group.isEmpty()) return ResponseEntity.notFound().build();
-        var query = new GetRescheduledTasksQuery(group.get().getId());
+        var groupIdOpt = getGroupIdFromUser(userDetails);
+        if (groupIdOpt.isEmpty()) return ResponseEntity.notFound().build();
+        var query = new GetRescheduledTasksQuery(groupIdOpt.get());
         var resource = taskMetricsQueryService.handle(query);
         return ResponseEntity.ok(resource);
     }
