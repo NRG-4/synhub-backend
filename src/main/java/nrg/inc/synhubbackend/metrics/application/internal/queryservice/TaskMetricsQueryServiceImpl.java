@@ -1,8 +1,8 @@
-package nrg.inc.synhubbackend.metrics.application.service;
+package nrg.inc.synhubbackend.metrics.application.internal.queryservice;
 
 import nrg.inc.synhubbackend.iam.domain.model.aggregates.User;
 import nrg.inc.synhubbackend.iam.infrastructure.persistence.jpa.repositories.UserRepository;
-import nrg.inc.synhubbackend.metrics.domain.model.services.TaskMetricsService;
+import nrg.inc.synhubbackend.metrics.domain.model.services.TaskMetricsQueryService;
 import nrg.inc.synhubbackend.metrics.interfaces.rest.resources.*;
 import nrg.inc.synhubbackend.tasks.domain.model.aggregates.Task;
 import nrg.inc.synhubbackend.tasks.domain.model.valueobjects.TaskStatus;
@@ -20,37 +20,37 @@ import nrg.inc.synhubbackend.metrics.domain.model.queries.GetTaskDistributionQue
 import nrg.inc.synhubbackend.metrics.domain.model.queries.GetTaskOverviewQuery;
 
 @Service
-public class TaskMetricsServiceImpl implements TaskMetricsService {
+public class TaskMetricsQueryServiceImpl implements TaskMetricsQueryService {
 
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
     private final GroupQueryService groupQueryService;
 
-    public TaskMetricsServiceImpl(TaskRepository taskRepository, UserRepository userRepository, GroupQueryService groupQueryService) {
+    public TaskMetricsQueryServiceImpl(TaskRepository taskRepository, UserRepository userRepository, GroupQueryService groupQueryService) {
         this.taskRepository = taskRepository;
         this.userRepository = userRepository;
         this.groupQueryService = groupQueryService;
     }
 
     @Override
-    public TaskTimePassedResource getTaskTimePassed(GetTaskTimePassedQuery query) {
+    public TaskTimePassedResource handle(GetTaskTimePassedQuery query) {
         List<Task> memberTasks = taskRepository.findByMember_Id(query.memberId());
 
         long totalTimePassed = memberTasks.stream()
-            .mapToLong(Task::getTimePassed)
-            .sum();
+                .mapToLong(Task::getTimePassed)
+                .sum();
 
         return new TaskTimePassedResource(query.memberId(), totalTimePassed);
     }
 
     @Override
-    public AvgCompletionTimeResource getAvgCompletionTime(GetAvgCompletionTimeQuery query) {
+    public AvgCompletionTimeResource handle(GetAvgCompletionTimeQuery query) {
         var groupOpt = groupQueryService.handle(new GetGroupByLeaderIdQuery(query.leaderId()));
         if (groupOpt.isEmpty()) {
             return new AvgCompletionTimeResource(
-                "AVG_COMPLETION_TIME",
-                0,
-                Map.of("completedTasks", 0)
+                    "AVG_COMPLETION_TIME",
+                    0,
+                    Map.of("completedTasks", 0)
             );
         }
         Long groupId = groupOpt.get().getId();
@@ -74,7 +74,7 @@ public class TaskMetricsServiceImpl implements TaskMetricsService {
     }
 
     @Override
-    public RescheduledTasksResource getRescheduledTasks(GetRescheduledTasksQuery query) {
+    public RescheduledTasksResource handle(GetRescheduledTasksQuery query) {
         List<Task> groupTasks = taskRepository.findByGroup_Id(query.groupId());
 
         long rescheduled = groupTasks.stream()
@@ -90,7 +90,7 @@ public class TaskMetricsServiceImpl implements TaskMetricsService {
     }
 
     @Override
-    public TaskDistributionResource getTaskDistribution(GetTaskDistributionQuery query) {
+    public TaskDistributionResource handle(GetTaskDistributionQuery query) {
         List<Task> groupTasks = taskRepository.findByGroup_Id(query.groupId());
 
         List<User> users = userRepository.findAll();
@@ -114,7 +114,7 @@ public class TaskMetricsServiceImpl implements TaskMetricsService {
     }
 
     @Override
-    public TaskOverviewResource getTaskOverview(GetTaskOverviewQuery query) {
+    public TaskOverviewResource handle(GetTaskOverviewQuery query) {
         List<Task> groupTasks = taskRepository.findByGroup_Id(query.groupId());
 
         Map<String, Long> overview = groupTasks.stream()

@@ -6,7 +6,7 @@ import nrg.inc.synhubbackend.groups.domain.model.queries.GetGroupByLeaderIdQuery
 import nrg.inc.synhubbackend.groups.domain.model.queries.GetLeaderByUsernameQuery;
 import nrg.inc.synhubbackend.groups.domain.services.GroupQueryService;
 import nrg.inc.synhubbackend.groups.domain.services.LeaderQueryService;
-import nrg.inc.synhubbackend.metrics.domain.model.services.TaskMetricsService;
+import nrg.inc.synhubbackend.metrics.domain.model.services.TaskMetricsQueryService;
 import nrg.inc.synhubbackend.metrics.domain.model.queries.*;
 import nrg.inc.synhubbackend.metrics.interfaces.rest.resources.*;
 import org.springframework.http.ResponseEntity;
@@ -19,11 +19,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Tag(name = "Metrics", description = "Provides access to analytics and group metrics")
 public class MetricsController {
 
-    private final TaskMetricsService taskMetricsService;
+    private final TaskMetricsQueryService taskMetricsService;
     private final LeaderQueryService leaderQueryService;
     private final GroupQueryService groupQueryService;
 
-    public MetricsController(TaskMetricsService taskMetricsService, LeaderQueryService leaderQueryService, GroupQueryService groupQueryService) {
+    public MetricsController(TaskMetricsQueryService taskMetricsService, LeaderQueryService leaderQueryService, GroupQueryService groupQueryService) {
         this.taskMetricsService = taskMetricsService;
         this.leaderQueryService = leaderQueryService;
         this.groupQueryService = groupQueryService;
@@ -35,7 +35,7 @@ public class MetricsController {
         tags = {"Metrics", "Tasks"}
     )
     @GetMapping("/task/member/{memberId}/time-passed")
-    public TaskTimePassedResource getTaskTimePassed(@PathVariable Long memberId) {
+    public TaskTimePassedResource getAverageTaskTimePassed(@PathVariable Long memberId) {
         return taskMetricsService.getTaskTimePassed(new GetTaskTimePassedQuery(memberId));
     }
 
