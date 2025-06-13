@@ -1,4 +1,4 @@
-package nrg.inc.synhubbackend.metrics.domain.model;
+package nrg.inc.synhubbackend.metrics.domain.model.aggregates;
 
 public class GroupMetrics {
     private Long groupId;
