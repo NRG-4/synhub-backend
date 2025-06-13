@@ -11,6 +11,4 @@ public class TaskOverviewResource {
     private String type;
     private int value;
     private Map<String, Integer> details;
-    private String context;
-    private String summary;
 }
