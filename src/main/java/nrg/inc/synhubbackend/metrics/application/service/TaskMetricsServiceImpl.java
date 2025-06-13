@@ -13,7 +13,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import nrg.inc.synhubbackend.metrics.domain.model.queries.GetTaskTimePassedQuery;
+import nrg.inc.synhubbackend.metrics.domain.model.queries.GetAvgCompletionTimeQuery;
+import nrg.inc.synhubbackend.metrics.domain.model.queries.GetRescheduledTasksQuery;
+import nrg.inc.synhubbackend.metrics.domain.model.queries.GetTaskDistributionQuery;
+import nrg.inc.synhubbackend.metrics.domain.model.queries.GetTaskOverviewQuery;
 
 @Service
 public class TaskMetricsServiceImpl implements TaskMetricsService {
@@ -29,15 +33,19 @@ public class TaskMetricsServiceImpl implements TaskMetricsService {
     }
 
     @Override
-    public TaskTimePassedResource getTaskTimePassed(Long taskId) {
-        Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new RuntimeException("Task not found"));
-        return new TaskTimePassedResource(taskId, task.getTimePassed());
+    public TaskTimePassedResource getTaskTimePassed(GetTaskTimePassedQuery query) {
+        List<Task> memberTasks = taskRepository.findByMember_Id(query.memberId());
+
+        long totalTimePassed = memberTasks.stream()
+            .mapToLong(Task::getTimePassed)
+            .sum();
+
+        return new TaskTimePassedResource(query.memberId(), totalTimePassed);
     }
 
     @Override
-    public AvgCompletionTimeResource getAvgCompletionTime(Long leaderId) {
-        var groupOpt = groupQueryService.handle(new GetGroupByLeaderIdQuery(leaderId));
+    public AvgCompletionTimeResource getAvgCompletionTime(GetAvgCompletionTimeQuery query) {
+        var groupOpt = groupQueryService.handle(new GetGroupByLeaderIdQuery(query.leaderId()));
         if (groupOpt.isEmpty()) {
             return new AvgCompletionTimeResource(
                 "AVG_COMPLETION_TIME",
@@ -47,11 +55,10 @@ public class TaskMetricsServiceImpl implements TaskMetricsService {
         }
         Long groupId = groupOpt.get().getId();
 
-        List<Task> completedTasks = taskRepository.findAll().stream()
-                .filter(task -> task.getMember() != null
-                        && task.getMember().getGroup() != null
-                        && task.getMember().getGroup().getId().equals(groupId)
-                        && task.getStatus() == TaskStatus.COMPLETED)
+        List<Task> groupTasks = taskRepository.findByGroup_Id(groupId);
+
+        List<Task> completedTasks = groupTasks.stream()
+                .filter(task -> task.getStatus() == TaskStatus.COMPLETED)
                 .collect(Collectors.toList());
 
         double avg = completedTasks.stream()
@@ -67,12 +74,8 @@ public class TaskMetricsServiceImpl implements TaskMetricsService {
     }
 
     @Override
-    public RescheduledTasksResource getRescheduledTasks(Long groupId) {
-        List<Task> groupTasks = taskRepository.findAll().stream()
-                .filter(task -> task.getMember() != null
-                        && task.getMember().getGroup() != null
-                        && task.getMember().getGroup().getId().equals(groupId))
-                .collect(Collectors.toList());
+    public RescheduledTasksResource getRescheduledTasks(GetRescheduledTasksQuery query) {
+        List<Task> groupTasks = taskRepository.findByGroup_Id(query.groupId());
 
         long rescheduled = groupTasks.stream()
                 .filter(task -> task.getTimesRearranged() > 0)
@@ -87,12 +90,8 @@ public class TaskMetricsServiceImpl implements TaskMetricsService {
     }
 
     @Override
-    public TaskDistributionResource getTaskDistribution(Long groupId) {
-        List<Task> groupTasks = taskRepository.findAll().stream()
-                .filter(task -> task.getMember() != null
-                        && task.getMember().getGroup() != null
-                        && task.getMember().getGroup().getId().equals(groupId))
-                .collect(Collectors.toList());
+    public TaskDistributionResource getTaskDistribution(GetTaskDistributionQuery query) {
+        List<Task> groupTasks = taskRepository.findByGroup_Id(query.groupId());
 
         List<User> users = userRepository.findAll();
 
@@ -115,12 +114,8 @@ public class TaskMetricsServiceImpl implements TaskMetricsService {
     }
 
     @Override
-    public TaskOverviewResource getTaskOverview(Long groupId) {
-        List<Task> groupTasks = taskRepository.findAll().stream()
-                .filter(task -> task.getMember() != null
-                        && task.getMember().getGroup() != null
-                        && task.getMember().getGroup().getId().equals(groupId))
-                .collect(Collectors.toList());
+    public TaskOverviewResource getTaskOverview(GetTaskOverviewQuery query) {
+        List<Task> groupTasks = taskRepository.findByGroup_Id(query.groupId());
 
         Map<String, Long> overview = groupTasks.stream()
                 .collect(Collectors.groupingBy(task -> task.getStatus().name(), Collectors.counting()));

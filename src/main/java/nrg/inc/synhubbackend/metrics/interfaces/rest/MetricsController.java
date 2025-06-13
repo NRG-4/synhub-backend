@@ -6,8 +6,8 @@ import nrg.inc.synhubbackend.groups.domain.model.queries.GetGroupByLeaderIdQuery
 import nrg.inc.synhubbackend.groups.domain.model.queries.GetLeaderByUsernameQuery;
 import nrg.inc.synhubbackend.groups.domain.services.GroupQueryService;
 import nrg.inc.synhubbackend.groups.domain.services.LeaderQueryService;
-import nrg.inc.synhubbackend.metrics.domain.model.services.GroupMetricsService;
 import nrg.inc.synhubbackend.metrics.domain.model.services.TaskMetricsService;
+import nrg.inc.synhubbackend.metrics.domain.model.queries.*;
 import nrg.inc.synhubbackend.metrics.interfaces.rest.resources.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,26 +19,24 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Tag(name = "Metrics", description = "Provides access to analytics and group metrics")
 public class MetricsController {
 
-    private final GroupMetricsService groupMetricsService;
     private final TaskMetricsService taskMetricsService;
     private final LeaderQueryService leaderQueryService;
     private final GroupQueryService groupQueryService;
 
-    public MetricsController(GroupMetricsService groupMetricsService, TaskMetricsService taskMetricsService, LeaderQueryService leaderQueryService, GroupQueryService groupQueryService) {
-        this.groupMetricsService = groupMetricsService;
+    public MetricsController(TaskMetricsService taskMetricsService, LeaderQueryService leaderQueryService, GroupQueryService groupQueryService) {
         this.taskMetricsService = taskMetricsService;
         this.leaderQueryService = leaderQueryService;
         this.groupQueryService = groupQueryService;
     }
 
     @Operation(
-        summary = "Get time passed for a completed task",
-        description = "Returns the time passed in milliseconds for a completed task.",
+        summary = "Get time passed for a member's completed task",
+        description = "Returns the time passed in milliseconds for a completed task assigned to the given member.",
         tags = {"Metrics", "Tasks"}
     )
-    @GetMapping("/task/{taskId}/time-passed")
-    public TaskTimePassedResource getTaskTimePassed(@PathVariable Long taskId) {
-        return taskMetricsService.getTaskTimePassed(taskId);
+    @GetMapping("/task/member/{memberId}/time-passed")
+    public TaskTimePassedResource getTaskTimePassed(@PathVariable Long memberId) {
+        return taskMetricsService.getTaskTimePassed(new GetTaskTimePassedQuery(memberId));
     }
 
     @Operation(
@@ -53,7 +51,7 @@ public class MetricsController {
         if (leader.isEmpty()) return ResponseEntity.notFound().build();
         var group = groupQueryService.handle(new GetGroupByLeaderIdQuery(leader.get().getId()));
         if (group.isEmpty()) return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(taskMetricsService.getTaskOverview(group.get().getId()));
+        return ResponseEntity.ok(taskMetricsService.getTaskOverview(new GetTaskOverviewQuery(group.get().getId())));
     }
 
     @Operation(
@@ -68,7 +66,7 @@ public class MetricsController {
         if (leader.isEmpty()) return ResponseEntity.notFound().build();
         var group = groupQueryService.handle(new GetGroupByLeaderIdQuery(leader.get().getId()));
         if (group.isEmpty()) return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(taskMetricsService.getTaskDistribution(group.get().getId()));
+        return ResponseEntity.ok(taskMetricsService.getTaskDistribution(new GetTaskDistributionQuery(group.get().getId())));
     }
 
     @Operation(
@@ -83,7 +81,7 @@ public class MetricsController {
         if (leader.isEmpty()) return ResponseEntity.notFound().build();
         var group = groupQueryService.handle(new GetGroupByLeaderIdQuery(leader.get().getId()));
         if (group.isEmpty()) return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(taskMetricsService.getRescheduledTasks(group.get().getId()));
+        return ResponseEntity.ok(taskMetricsService.getRescheduledTasks(new GetRescheduledTasksQuery(group.get().getId())));
     }
 
     @Operation(
@@ -96,6 +94,6 @@ public class MetricsController {
         String username = userDetails.getUsername();
         var leader = leaderQueryService.handle(new GetLeaderByUsernameQuery(username));
         if (leader.isEmpty()) return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(taskMetricsService.getAvgCompletionTime(leader.get().getId()));
+        return ResponseEntity.ok(taskMetricsService.getAvgCompletionTime(new GetAvgCompletionTimeQuery(leader.get().getId())));
     }
 }
