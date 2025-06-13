@@ -3,14 +3,17 @@ package nrg.inc.synhubbackend.metrics.interfaces.rest;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import nrg.inc.synhubbackend.groups.domain.model.queries.GetGroupByIdQuery;
+import nrg.inc.synhubbackend.groups.domain.model.queries.GetGroupByLeaderIdQuery;
+import nrg.inc.synhubbackend.groups.domain.model.queries.GetLeaderByUsernameQuery;
 import nrg.inc.synhubbackend.groups.domain.services.GroupQueryService;
-import nrg.inc.synhubbackend.metrics.application.service.GroupMetricsService;
-import nrg.inc.synhubbackend.metrics.application.service.TaskMetricsService;
-import nrg.inc.synhubbackend.metrics.domain.model.GroupMetrics;
+import nrg.inc.synhubbackend.groups.domain.services.LeaderQueryService;
+import nrg.inc.synhubbackend.metrics.domain.model.services.GroupMetricsService;
+import nrg.inc.synhubbackend.metrics.domain.model.services.TaskMetricsService;
 import nrg.inc.synhubbackend.metrics.interfaces.resources.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 
 @RestController
 @RequestMapping("/api/v1/metrics")
@@ -18,28 +21,15 @@ import org.springframework.web.bind.annotation.*;
 public class MetricsController {
 
     private final GroupMetricsService groupMetricsService;
-    private final GroupQueryService groupQueryService;
     private final TaskMetricsService taskMetricsService;
+    private final LeaderQueryService leaderQueryService;
+    private final GroupQueryService groupQueryService;
 
-    public MetricsController(GroupMetricsService groupMetricsService, GroupQueryService groupQueryService, TaskMetricsService taskMetricsService) {
+    public MetricsController(GroupMetricsService groupMetricsService, TaskMetricsService taskMetricsService, LeaderQueryService leaderQueryService, GroupQueryService groupQueryService) {
         this.groupMetricsService = groupMetricsService;
-        this.groupQueryService = groupQueryService;
         this.taskMetricsService = taskMetricsService;
-    }
-
-    @GetMapping("/groups/{groupId}/member-count")
-    @Operation(summary = "Get group metrics", description = "Returns group metrics including member count")
-    public ResponseEntity<GroupMetrics> getGroupMemberCount(@PathVariable Long groupId) {
-        var metrics = groupMetricsService.getGroupMetrics(groupId);
-        return ResponseEntity.ok(metrics);
-    }
-
-    @GetMapping("/groups/{groupId}/raw-member-count")
-    @Operation(summary = "Get raw member count", description = "Returns the raw member count directly from the group entity")
-    public ResponseEntity<Integer> getRawMemberCount(@PathVariable Long groupId) {
-        return groupQueryService.handle(new GetGroupByIdQuery(groupId))
-                .map(group -> ResponseEntity.ok(group.getMemberCount()))
-                .orElse(ResponseEntity.notFound().build());
+        this.leaderQueryService = leaderQueryService;
+        this.groupQueryService = groupQueryService;
     }
 
     @Operation(
@@ -51,34 +41,46 @@ public class MetricsController {
     public TaskTimePassedResource getTaskTimePassed(@PathVariable Long taskId) {
         return taskMetricsService.getTaskTimePassed(taskId);
     }
-    
-    @GetMapping("/tasks/overview/{groupId}")
+
+    @GetMapping("/tasks/overview")
     @Operation(summary = "Get task overview for group", description = "Returns general task status count for a group")
-    public TaskOverviewResource getTaskOverview(@PathVariable Long groupId) {
-        return taskMetricsService.getTaskOverview(groupId);
+    public ResponseEntity<TaskOverviewResource> getTaskOverview(@AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails.getUsername();
+        var leader = leaderQueryService.handle(new GetLeaderByUsernameQuery(username));
+        if (leader.isEmpty()) return ResponseEntity.notFound().build();
+        var group = groupQueryService.handle(new GetGroupByLeaderIdQuery(leader.get().getId()));
+        if (group.isEmpty()) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(taskMetricsService.getTaskOverview(group.get().getId()));
     }
 
-    @GetMapping("/tasks/distribution/{groupId}")
+    @GetMapping("/tasks/distribution")
     @Operation(summary = "Get task distribution for group", description = "Returns the number of tasks per member in a group")
-    public TaskDistributionResource getTaskDistribution(@PathVariable Long groupId) {
-        return taskMetricsService.getTaskDistribution(groupId);
+    public ResponseEntity<TaskDistributionResource> getTaskDistribution(@AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails.getUsername();
+        var leader = leaderQueryService.handle(new GetLeaderByUsernameQuery(username));
+        if (leader.isEmpty()) return ResponseEntity.notFound().build();
+        var group = groupQueryService.handle(new GetGroupByLeaderIdQuery(leader.get().getId()));
+        if (group.isEmpty()) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(taskMetricsService.getTaskDistribution(group.get().getId()));
     }
 
-    @GetMapping("/tasks/rescheduled/{groupId}")
+    @GetMapping("/tasks/rescheduled")
     @Operation(summary = "Get rescheduled tasks", description = "Returns the count of rescheduled vs non-rescheduled tasks")
-    public RescheduledTasksResource getRescheduledTasks(@PathVariable Long groupId) {
-        return taskMetricsService.getRescheduledTasks(groupId);
+    public ResponseEntity<RescheduledTasksResource> getRescheduledTasks(@AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails.getUsername();
+        var leader = leaderQueryService.handle(new GetLeaderByUsernameQuery(username));
+        if (leader.isEmpty()) return ResponseEntity.notFound().build();
+        var group = groupQueryService.handle(new GetGroupByLeaderIdQuery(leader.get().getId()));
+        if (group.isEmpty()) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(taskMetricsService.getRescheduledTasks(group.get().getId()));
     }
 
-    @GetMapping("/tasks/avg-solution-time/{leaderId}")
-    @Operation(summary = "Get average solution time", description = "Returns the average solution time in days for tasks completed by a leader")
-    public AvgSolutionTimeResource getAvgSolutionTime(@PathVariable Long leaderId) {
-        return taskMetricsService.getAvgSolutionTime(leaderId);
-    }
-
-    @GetMapping("/tasks/avg-dev-time/{memberId}")
-    @Operation(summary = "Get average development time", description = "Returns the average time spent on tasks by a member")
-    public AvgDevelopmentTimeResource getAvgDevTime(@PathVariable Long memberId) {
-        return taskMetricsService.getAvgDevTime(memberId);
+    @GetMapping("/tasks/avg-completion-time")
+    @Operation(summary = "Get average completion time", description = "Returns the average time spent on tasks by a member or leader")
+    public ResponseEntity<AvgCompletionTimeResource> getAvgCompletionTime(@AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails.getUsername();
+        var leader = leaderQueryService.handle(new GetLeaderByUsernameQuery(username));
+        if (leader.isEmpty()) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(taskMetricsService.getAvgCompletionTime(leader.get().getId()));
     }
 }
