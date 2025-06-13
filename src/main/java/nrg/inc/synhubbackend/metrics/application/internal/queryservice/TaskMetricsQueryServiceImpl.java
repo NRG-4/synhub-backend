@@ -85,7 +85,13 @@ public class TaskMetricsQueryServiceImpl implements TaskMetricsQueryService {
                 "rescheduled", (int) rescheduled
         );
 
-        return new RescheduledTasksResource("RESCHEDULED_TASKS", rescheduled, details);
+        List<Long> rescheduledMemberIds = groupTasks.stream()
+                .filter(task -> task.getTimesRearranged() > 0 && task.getMember() != null)
+                .map(task -> task.getMember().getId())
+                .distinct()
+                .collect(Collectors.toList());
+
+        return new RescheduledTasksResource("RESCHEDULED_TASKS", rescheduled, details, rescheduledMemberIds);
     }
 
     @Override
