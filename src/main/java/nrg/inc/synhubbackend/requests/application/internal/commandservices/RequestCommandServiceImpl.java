@@ -2,6 +2,7 @@ package nrg.inc.synhubbackend.requests.application.internal.commandservices;
 
 import nrg.inc.synhubbackend.requests.domain.model.aggregates.Request;
 import nrg.inc.synhubbackend.requests.domain.model.commands.CreateRequestCommand;
+import nrg.inc.synhubbackend.requests.domain.model.commands.DeleteRequestCommand;
 import nrg.inc.synhubbackend.requests.domain.model.commands.UpdateRequestCommand;
 import nrg.inc.synhubbackend.requests.domain.services.RequestCommandService;
 import nrg.inc.synhubbackend.requests.infrastructure.persistence.jpa.repositories.RequestRepository;
@@ -47,5 +48,20 @@ public class RequestCommandServiceImpl implements RequestCommandService {
         } catch (Exception e) {
             throw new IllegalArgumentException("Error while updating request: " + e.getMessage());
         }
+    }
+
+    @Override
+    public void handle(DeleteRequestCommand command) {
+        var requestId = command.requestId();
+
+        if (!requestRepository.existsById(requestId)) {
+            throw new IllegalArgumentException("Request with id " + requestId + " does not exist");
+        }
+        try {
+            requestRepository.deleteById(requestId);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Error while deleting request: " + e.getMessage());
+        }
+
     }
 }
