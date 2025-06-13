@@ -3,7 +3,7 @@ package nrg.inc.synhubbackend.metrics.application.service;
 import nrg.inc.synhubbackend.iam.domain.model.aggregates.User;
 import nrg.inc.synhubbackend.iam.infrastructure.persistence.jpa.repositories.UserRepository;
 import nrg.inc.synhubbackend.metrics.domain.model.services.TaskMetricsService;
-import nrg.inc.synhubbackend.metrics.interfaces.resources.*;
+import nrg.inc.synhubbackend.metrics.interfaces.rest.resources.*;
 import nrg.inc.synhubbackend.tasks.domain.model.aggregates.Task;
 import nrg.inc.synhubbackend.tasks.domain.model.valueobjects.TaskStatus;
 import nrg.inc.synhubbackend.tasks.infrastructure.persistence.jpa.repositories.TaskRepository;
@@ -32,7 +32,6 @@ public class TaskMetricsServiceImpl implements TaskMetricsService {
     public TaskTimePassedResource getTaskTimePassed(Long taskId) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new RuntimeException("Task not found"));
-
         return new TaskTimePassedResource(taskId, task.getTimePassed());
     }
 
@@ -62,7 +61,6 @@ public class TaskMetricsServiceImpl implements TaskMetricsService {
                 .flatMap(u -> {
                     var member = u.getMember();
                     if (member != null) {
-                        // Cambiado: filtra manualmente por memberId
                         return taskRepository.findAll().stream()
                                 .filter(t -> t.getMember() != null && t.getMember().getId().equals(member.getId()));
                     }
@@ -83,7 +81,6 @@ public class TaskMetricsServiceImpl implements TaskMetricsService {
 
     @Override
     public AvgCompletionTimeResource getAvgCompletionTime(Long leaderId) {
-        // Obtener el grupo del líder
         var groupOpt = groupQueryService.handle(new GetGroupByLeaderIdQuery(leaderId));
         if (groupOpt.isEmpty()) {
             return new AvgCompletionTimeResource(
@@ -94,7 +91,6 @@ public class TaskMetricsServiceImpl implements TaskMetricsService {
         }
         Long groupId = groupOpt.get().getId();
 
-        // Filtrar tareas por grupo y estado COMPLETED
         List<Task> completedTasks = taskRepository.findAll().stream()
                 .filter(task -> task.getMember() != null
                         && task.getMember().getGroup() != null
@@ -144,12 +140,11 @@ public class TaskMetricsServiceImpl implements TaskMetricsService {
 
         List<User> users = userRepository.findAll();
 
-        // Construir el mapa correcto para MemberTaskInfo
-        Map<String, TaskDistributionResource.MemberTaskInfo> details = new HashMap<>();
         Map<Long, List<Task>> tasksByMemberId = groupTasks.stream()
                 .filter(task -> task.getMember() != null)
                 .collect(Collectors.groupingBy(task -> task.getMember().getId()));
 
+        Map<String, MemberTaskInfo> details = new HashMap<>();
         for (Map.Entry<Long, List<Task>> entry : tasksByMemberId.entrySet()) {
             Long memberId = entry.getKey();
             int taskCount = entry.getValue().size();
@@ -157,7 +152,7 @@ public class TaskMetricsServiceImpl implements TaskMetricsService {
                     .filter(u -> u.getMember() != null && u.getMember().getId().equals(memberId))
                     .findFirst();
             String memberName = userOpt.map(u -> u.getName() + " " + u.getSurname()).orElse("Desconocido");
-            details.put(memberId.toString(), new TaskDistributionResource.MemberTaskInfo(memberName, taskCount));
+            details.put(memberId.toString(), new MemberTaskInfo(memberName, taskCount));
         }
 
         return new TaskDistributionResource("TASK_DISTRIBUTION", groupTasks.size(), details);
