@@ -126,4 +126,27 @@ public class InvitationController {
 
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/member")
+    @Operation(summary = "Get invitation of a member", description = "Get invitation for a specific member")
+    public ResponseEntity<InvitationResource> getInvitationByMember(@AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails.getUsername();
+
+        var getMemberByUsernameQuery = new GetMemberByUsernameQuery(username);
+
+        var member = this.memberQueryService.handle(getMemberByUsernameQuery);
+
+        if(member.isEmpty()) return ResponseEntity.notFound().build();
+
+        Long memberId = member.get().getId();
+
+        var getInvitationByMemberIdQuery = new GetInvitationByMemberIdQuery(memberId);
+
+        var invitation = this.invitationQueryService.handle(getInvitationByMemberIdQuery);
+
+        if(invitation.isEmpty()) return ResponseEntity.notFound().build();
+
+        var invitationResource = InvitationResourceFromEntityAssembler.toResourceFromEntity(invitation.get(), member.get());
+        return ResponseEntity.ok(invitationResource);
+    }
 }
