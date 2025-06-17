@@ -8,8 +8,8 @@ public class RequestResourceFromEntityAssembler {
         return new RequestResource(
                 entity.getId(),
                 entity.getDescription(),
-                entity.getRequestType().toString(),
-                entity.getRequestStatus().toString(),
+                entity.getRequestType(),
+                entity.getRequestStatus(),
                 entity.getTaskId(),
                 entity.getMemberId()
         );

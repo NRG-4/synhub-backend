@@ -10,8 +10,8 @@ public class GroupResourceFromEntityAssembler {
                 group.getName(),
                 group.getImgUrl().imgUrl(),
                 group.getDescription(),
-                group.getMemberCount(),
-                group.getLeader().getName()
+                group.getCode().code(),
+                group.getMemberCount()
         );
     }
 }
