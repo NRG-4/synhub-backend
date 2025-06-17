@@ -4,12 +4,12 @@ import nrg.inc.synhubbackend.requests.domain.model.commands.CreateRequestCommand
 import nrg.inc.synhubbackend.requests.interfaces.rest.resources.CreateRequestResource;
 
 public class CreateRequestCommandFromResourceAssembler {
-    public static CreateRequestCommand toCommandFromResource(CreateRequestResource resource, Long taskId) {
+    public static CreateRequestCommand toCommandFromResource(CreateRequestResource resource, Long taskId, Long memberId) {
         return new CreateRequestCommand(
                 resource.description(),
                 resource.requestType(),
                 taskId,
-                resource.memberId()
+                memberId
         );
     }
 }
