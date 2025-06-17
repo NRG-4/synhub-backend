@@ -2,7 +2,8 @@ package nrg.inc.synhubbackend.requests.domain.model.valueobjects;
 
 public enum RequestType {
     SUBMISSION,
-    MODIFICATION;
+    MODIFICATION,
+    EXPIRED;
 
     public static RequestType fromString(String type) {
         for (RequestType requestType : RequestType.values()) {
