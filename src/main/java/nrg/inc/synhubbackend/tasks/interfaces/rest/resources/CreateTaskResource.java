@@ -1,10 +1,10 @@
 package nrg.inc.synhubbackend.tasks.interfaces.rest.resources;
 
-import java.util.Date;
+import java.time.OffsetDateTime;
 
 public record CreateTaskResource(
         String title,
         String description,
-        Date dueDate
+        OffsetDateTime dueDate
 ) {
 }
