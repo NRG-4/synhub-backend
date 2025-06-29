@@ -12,8 +12,10 @@ import nrg.inc.synhubbackend.tasks.domain.model.queries.GetMemberByIdQuery;
 import nrg.inc.synhubbackend.tasks.domain.model.queries.GetMemberByUsernameQuery;
 import nrg.inc.synhubbackend.tasks.domain.services.MemberQueryService;
 import nrg.inc.synhubbackend.tasks.domain.services.TaskQueryService;
+import nrg.inc.synhubbackend.tasks.interfaces.rest.resources.ExtendedGroupResource;
 import nrg.inc.synhubbackend.tasks.interfaces.rest.resources.MemberResource;
 import nrg.inc.synhubbackend.tasks.interfaces.rest.resources.TaskResource;
+import nrg.inc.synhubbackend.tasks.interfaces.rest.transform.ExtendedGroupResourceFromEntityAssembler;
 import nrg.inc.synhubbackend.tasks.interfaces.rest.transform.MemberResourceFromEntityAssembler;
 import nrg.inc.synhubbackend.tasks.interfaces.rest.transform.TaskResourceFromEntityAssembler;
 import org.springframework.http.ResponseEntity;
@@ -70,7 +72,7 @@ public class MemberController {
 
     @GetMapping("/group")
     @Operation(summary = "Get group by member authenticated", description = "Retrieve the group associated with the authenticated member")
-    public ResponseEntity<GroupResource> getGroupByMemberId(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<ExtendedGroupResource> getGroupByMemberId(@AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
         var getMemberByUsernameQuery = new GetMemberByUsernameQuery(username);
         var member = this.memberQueryService.handle(getMemberByUsernameQuery);
@@ -82,7 +84,7 @@ public class MemberController {
         if (group.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        var groupResource = GroupResourceFromEntityAssembler.toResourceFromEntity(group.get());
+        var groupResource = ExtendedGroupResourceFromEntityAssembler.toResourceFromEntity(group.get());
         return ResponseEntity.ok(groupResource);
     }
 
