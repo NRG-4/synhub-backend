@@ -3,10 +3,12 @@ package nrg.inc.synhubbackend.requests.domain.model.aggregates;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 import nrg.inc.synhubbackend.requests.domain.model.commands.CreateRequestCommand;
 import nrg.inc.synhubbackend.requests.domain.model.valueobjects.RequestStatus;
 import nrg.inc.synhubbackend.requests.domain.model.valueobjects.RequestType;
 import nrg.inc.synhubbackend.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
+import nrg.inc.synhubbackend.tasks.domain.model.aggregates.Task;
 
 @Getter
 @Entity
@@ -23,9 +25,10 @@ public class Request extends AuditableAbstractAggregateRoot<Request> {
     @Column(name = "request_status")
     private RequestStatus requestStatus;
 
-    @NonNull
-    @Column(name = "task_id")
-    private Long taskId;
+    @Setter
+    @OneToOne
+    @JoinColumn(name = "task_id")
+    private Task task;
 
     @NonNull
     @Column(name = "member_id")
@@ -42,24 +45,14 @@ public class Request extends AuditableAbstractAggregateRoot<Request> {
         return requestStatus.toString();
     }
 
-    public Request(String description, RequestType requestType, RequestStatus requestStatus, Long taskId, Long memberId) {
-        this.description = description;
-        this.requestType = requestType;
-        this.requestStatus = requestStatus;
-        this.taskId = taskId;
-        this.memberId = memberId;
-    }
-
     public Request(CreateRequestCommand command) {
         this.description = command.description();
         this.requestType = RequestType.fromString(command.requestType());
         this.requestStatus = RequestStatus.PENDING;
-        this.taskId = command.taskId();
         this.memberId = command.memberId();
     }
 
-    public Request updateRequestStatus(String requestStatus) {
+    public void updateRequestStatus(String requestStatus) {
         this.requestStatus = RequestStatus.fromString(requestStatus);
-        return this;
     }
 }
