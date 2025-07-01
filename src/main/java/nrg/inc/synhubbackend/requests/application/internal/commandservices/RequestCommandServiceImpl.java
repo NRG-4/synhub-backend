@@ -6,6 +6,7 @@ import nrg.inc.synhubbackend.requests.domain.model.commands.DeleteRequestCommand
 import nrg.inc.synhubbackend.requests.domain.model.commands.UpdateRequestCommand;
 import nrg.inc.synhubbackend.requests.domain.services.RequestCommandService;
 import nrg.inc.synhubbackend.requests.infrastructure.persistence.jpa.repositories.RequestRepository;
+import nrg.inc.synhubbackend.tasks.interfaces.acl.TasksContextFacade;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -14,9 +15,13 @@ import java.util.Optional;
 public class RequestCommandServiceImpl implements RequestCommandService {
 
     private final RequestRepository requestRepository;
+    private final TasksContextFacade tasksContextFacade;
 
-    public RequestCommandServiceImpl(RequestRepository requestRepository) {
+    public RequestCommandServiceImpl(
+            RequestRepository requestRepository,
+            TasksContextFacade tasksContextFacade) {
         this.requestRepository = requestRepository;
+        this.tasksContextFacade = tasksContextFacade;
     }
 
     @Override
@@ -26,6 +31,14 @@ public class RequestCommandServiceImpl implements RequestCommandService {
         }
 
         var request = new Request(command);
+
+        var task = this.tasksContextFacade.getTaskById(command.taskId());
+        if (task.isEmpty()) {
+            throw new IllegalArgumentException("Task with id " + command.taskId() + " does not exist");
+        }
+
+        request.setTask(task.get());
+
         this.requestRepository.save(request);
         return request.getId();
     }
