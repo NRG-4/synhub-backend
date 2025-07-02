@@ -47,7 +47,6 @@ public class RequestCommandServiceImpl implements RequestCommandService {
     public Optional<Request> handle(UpdateRequestCommand command) {
         var requestId = command.requestId();
 
-        // If the request does not exist, throw an exception
         if (!this.requestRepository.existsById(requestId)) {
             throw new IllegalArgumentException("Request with id " + requestId + " does not exist");
         }
