@@ -58,13 +58,14 @@ public class RequestController {
 
         var memberId = member.get().getId();
 
+        // Only the member who created the task can create a request for it
         var getTaskByIdQuery = new GetTaskByIdQuery(taskId);
         var optionalTask = this.taskQueryService.handle(getTaskByIdQuery);
         if (optionalTask.isEmpty() || !optionalTask.get().getMember().getId().equals(memberId)) {
             return ResponseEntity.badRequest().build();
         }
 
-        var createRequestCommand = CreateRequestCommandFromResourceAssembler.toCommandFromResource(resource, taskId, memberId);
+        var createRequestCommand = CreateRequestCommandFromResourceAssembler.toCommandFromResource(resource, taskId);
         var requestId = requestCommandService.handle(createRequestCommand);
 
         if(requestId.equals(0L)) {

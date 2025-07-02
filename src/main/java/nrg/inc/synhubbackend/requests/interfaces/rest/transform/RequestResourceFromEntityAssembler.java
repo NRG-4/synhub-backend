@@ -11,8 +11,7 @@ public class RequestResourceFromEntityAssembler {
                 entity.getDescription(),
                 entity.getRequestType(),
                 entity.getRequestStatus(),
-                TaskResourceFromEntityAssembler.toResourceFromEntity(entity.getTask()),
-                entity.getMemberId()
+                TaskResourceFromEntityAssembler.toResourceFromEntity(entity.getTask())
         );
     }
 }
