@@ -2,10 +2,7 @@ package nrg.inc.synhubbackend.groups.application.internal.commandservices;
 
 import nrg.inc.synhubbackend.groups.domain.model.aggregates.Group;
 import nrg.inc.synhubbackend.groups.domain.model.aggregates.Leader;
-import nrg.inc.synhubbackend.groups.domain.model.commands.CreateGroupCommand;
-import nrg.inc.synhubbackend.groups.domain.model.commands.DeleteGroupCommand;
-import nrg.inc.synhubbackend.groups.domain.model.commands.RemoveMemberFromGroupCommand;
-import nrg.inc.synhubbackend.groups.domain.model.commands.UpdateGroupCommand;
+import nrg.inc.synhubbackend.groups.domain.model.commands.*;
 import nrg.inc.synhubbackend.groups.domain.model.valueobjects.GroupCode;
 import nrg.inc.synhubbackend.groups.domain.services.GroupCommandService;
 import nrg.inc.synhubbackend.groups.infrastructure.persistence.jpa.repositories.GroupRepository;
@@ -100,6 +97,29 @@ public class GroupCommandServiceImpl implements GroupCommandService {
 
         if (!group.getMembers().contains(member)) {
             throw new IllegalArgumentException("Member with id " + command.memberId() + " does not exist in group with id " + groupId);
+        }
+
+        try {
+            group.getMembers().remove(member);
+            member.setGroup(null);
+            group.setMemberCount(group.getMembers().size());
+            memberRepository.save(member);
+            groupRepository.save(group);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Error while removing member from group: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void handle(LeaveGroupCommand command) {
+        var group = groupRepository.findById(command.groupId())
+                .orElseThrow(() -> new IllegalArgumentException("Group not found for member"));
+
+        var member = memberRepository.findById(command.memberId())
+                .orElseThrow(() -> new IllegalArgumentException("Member with id " + command.memberId() + " does not exist"));
+
+        if (!group.getMembers().contains(member)) {
+            throw new IllegalArgumentException("Member with id " + command.memberId() + " does not exist in group with id " + group.getId());
         }
 
         try {
