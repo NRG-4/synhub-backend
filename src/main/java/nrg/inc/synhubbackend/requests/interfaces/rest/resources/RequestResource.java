@@ -7,7 +7,6 @@ public record RequestResource(
         String description,
         String requestType,
         String requestStatus,
-        TaskResource task,
-        Long memberId
+        TaskResource task
 ) {
 }
