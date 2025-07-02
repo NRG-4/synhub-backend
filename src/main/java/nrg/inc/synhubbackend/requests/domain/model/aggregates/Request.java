@@ -30,10 +30,6 @@ public class Request extends AuditableAbstractAggregateRoot<Request> {
     @JoinColumn(name = "task_id")
     private Task task;
 
-    @NonNull
-    @Column(name = "member_id")
-    private Long memberId;
-
     public Request() {
     }
 
@@ -49,7 +45,6 @@ public class Request extends AuditableAbstractAggregateRoot<Request> {
         this.description = command.description();
         this.requestType = RequestType.fromString(command.requestType());
         this.requestStatus = RequestStatus.PENDING;
-        this.memberId = command.memberId();
     }
 
     public void updateRequestStatus(String requestStatus) {
