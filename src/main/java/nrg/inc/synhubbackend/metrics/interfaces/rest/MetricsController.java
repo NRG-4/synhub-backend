@@ -108,4 +108,52 @@ public class MetricsController {
         var resource = taskMetricsQueryService.handle(query);
         return ResponseEntity.ok(resource);
     }
+
+    @GetMapping("/member/{memberId}/tasks/overview")
+    @Operation(
+        summary = "Get task overview for member",
+        description = "Returns a summary of task statuses for the given member.",
+        tags = {"Metrics"}
+    )
+    public ResponseEntity<TaskOverviewResource> getTaskOverviewForMember(@PathVariable Long memberId) {
+        var query = new GetTaskOverviewForMemberQuery(memberId);
+        var resource = taskMetricsQueryService.handle(query);
+        return ResponseEntity.ok(resource);
+    }
+
+    @GetMapping("/member/{memberId}/tasks/distribution")
+    @Operation(
+        summary = "Get task distribution for member",
+        description = "Returns the number of tasks assigned to the given member.",
+        tags = {"Metrics"}
+    )
+    public ResponseEntity<TaskDistributionResource> getTaskDistributionForMember(@PathVariable Long memberId) {
+        var query = new GetTaskDistributionForMemberQuery(memberId);
+        var resource = taskMetricsQueryService.handle(query);
+        return ResponseEntity.ok(resource);
+    }
+
+    @GetMapping("/member/{memberId}/tasks/rescheduled")
+    @Operation(
+        summary = "Get rescheduled tasks for member",
+        description = "Returns the count of rescheduled vs non-rescheduled tasks for the given member.",
+        tags = {"Metrics"}
+    )
+    public ResponseEntity<RescheduledTasksResource> getRescheduledTasksForMember(@PathVariable Long memberId) {
+        var query = new GetRescheduledTasksForMemberQuery(memberId);
+        var resource = taskMetricsQueryService.handle(query);
+        return ResponseEntity.ok(resource);
+    }
+
+    @GetMapping("/member/{memberId}/tasks/avg-completion-time")
+    @Operation(
+        summary = "Get average completion time for member",
+        description = "Returns the average time (in days) it takes for the given member to complete tasks.",
+        tags = {"Metrics"}
+    )
+    public ResponseEntity<AvgCompletionTimeResource> getAvgCompletionTimeForMember(@PathVariable Long memberId) {
+        var query = new GetAvgCompletionTimeForMemberQuery(memberId);
+        var resource = taskMetricsQueryService.handle(query);
+        return ResponseEntity.ok(resource);
+    }
 }
