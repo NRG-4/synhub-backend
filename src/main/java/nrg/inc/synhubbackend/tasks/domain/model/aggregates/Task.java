@@ -24,6 +24,7 @@ public class Task extends AuditableAbstractAggregateRoot<Task> {
     @NonNull
     private String description;
 
+    @Setter
     @Enumerated(EnumType.STRING)
     private TaskStatus status;
 
@@ -85,6 +86,11 @@ public class Task extends AuditableAbstractAggregateRoot<Task> {
         }
         if(command.dueDate() != null) {
             this.dueDate = command.dueDate();
+            if(command.dueDate().isBefore(OffsetDateTime.now(ZoneOffset.UTC))) {
+                this.status = TaskStatus.EXPIRED;
+            } else {
+                this.status = TaskStatus.IN_PROGRESS;
+            }
         }
     }
 }
