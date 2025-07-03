@@ -146,4 +146,43 @@ public class MemberController {
 
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/tasks/next")
+    @Operation(summary = "Get the next task by authenticated member", description = "Fetches the next task for the authenticated member.")
+    public ResponseEntity<TaskResource> getNextTaskByMemberAuthenticated(@AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails.getUsername();
+
+        var getMemberByUsernameQuery = new GetMemberByUsernameQuery(username);
+
+        var member = this.memberQueryService.handle(getMemberByUsernameQuery);
+
+        if(member.isEmpty()) return ResponseEntity.notFound().build();
+
+        var getAllTasksByMemberId = new GetAllTasksByMemberId(member.get().getId());
+
+        var tasks = taskQueryService.handle(getAllTasksByMemberId);
+
+        if (tasks.isEmpty()) return ResponseEntity.notFound().build();
+
+        var now = LocalDateTime.now();
+
+        var nextTask = tasks.stream()
+                .filter(task -> {
+                    if (task.getDueDate() == null) return false;
+                    LocalDateTime dueDate = task.getDueDate().toInstant()
+                            .atZone(ZoneId.systemDefault())
+                            .toLocalDateTime();
+                    return !dueDate.isBefore(now);
+                })
+                .min((t1, t2) -> {
+                    LocalDateTime d1 = t1.getDueDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+                    LocalDateTime d2 = t2.getDueDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+                    return d1.compareTo(d2);
+                });
+
+        if (nextTask.isEmpty()) return ResponseEntity.notFound().build();
+
+        var taskResource = TaskResourceFromEntityAssembler.toResourceFromEntity(nextTask.get());
+        return ResponseEntity.ok(taskResource);
+    }
 }
