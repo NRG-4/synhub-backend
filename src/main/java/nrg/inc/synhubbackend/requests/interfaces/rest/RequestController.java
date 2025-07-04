@@ -45,11 +45,6 @@ public class RequestController {
     @PostMapping
     @Operation(summary = "Create a new request", description = "Create a new request")
     public ResponseEntity<RequestResource> createRequest(@PathVariable Long taskId, @RequestBody CreateRequestResource resource, @AuthenticationPrincipal UserDetails userDetails) {
-        try {
-            RequestType.fromString(resource.requestType());
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
 
         String username = userDetails.getUsername();
         var getMemberByUsernameQuery = new GetMemberByUsernameQuery(username);
@@ -58,26 +53,22 @@ public class RequestController {
 
         var memberId = member.get().getId();
 
-        // Only the member who created the task can create a request for it
         var getTaskByIdQuery = new GetTaskByIdQuery(taskId);
         var optionalTask = this.taskQueryService.handle(getTaskByIdQuery);
-        if (optionalTask.isEmpty() || !optionalTask.get().getMember().getId().equals(memberId)) {
+        if (optionalTask.isEmpty() || !optionalTask.get().getMember().getId().equals(memberId))
             return ResponseEntity.badRequest().build();
-        }
 
         var createRequestCommand = CreateRequestCommandFromResourceAssembler.toCommandFromResource(resource, taskId);
         var requestId = requestCommandService.handle(createRequestCommand);
 
-        if(requestId.equals(0L)) {
+        if(requestId.equals(0L))
             return ResponseEntity.badRequest().build();
-        }
 
         var getRequestByIdQuery = new GetRequestByIdQuery(requestId);
         var optionalRequest = this.requestQueryService.handle(getRequestByIdQuery);
 
-        if (optionalRequest.isEmpty()) {
+        if (optionalRequest.isEmpty())
             return ResponseEntity.badRequest().build();
-        }
 
         var requestResource = RequestResourceFromEntityAssembler.toResourceFromEntity(optionalRequest.get());
         return new ResponseEntity<>(requestResource, HttpStatus.CREATED);
