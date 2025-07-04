@@ -4,9 +4,11 @@ import nrg.inc.synhubbackend.requests.domain.model.aggregates.Request;
 import nrg.inc.synhubbackend.requests.domain.model.commands.CreateRequestCommand;
 import nrg.inc.synhubbackend.requests.domain.model.commands.DeleteRequestCommand;
 import nrg.inc.synhubbackend.requests.domain.model.commands.UpdateRequestCommand;
+import nrg.inc.synhubbackend.requests.domain.model.valueobjects.RequestType;
 import nrg.inc.synhubbackend.requests.domain.services.RequestCommandService;
 import nrg.inc.synhubbackend.requests.infrastructure.persistence.jpa.repositories.RequestRepository;
 import nrg.inc.synhubbackend.tasks.interfaces.acl.TasksContextFacade;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -26,19 +28,22 @@ public class RequestCommandServiceImpl implements RequestCommandService {
 
     @Override
     public Long handle(CreateRequestCommand command) {
-        if (this.requestRepository.existsByTaskId(command.taskId())) {
-            throw new IllegalArgumentException("A request already exists for current task");
+        try {
+            RequestType.fromString(command.requestType());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid request type");
         }
-
-        var request = new Request(command);
 
         var task = this.tasksContextFacade.getTaskById(command.taskId());
-        if (task.isEmpty()) {
+
+        if (task.isEmpty())
             throw new IllegalArgumentException("Task with id " + command.taskId() + " does not exist");
-        }
 
+        if (this.requestRepository.existsByTaskId(command.taskId()))
+            throw new IllegalArgumentException("A request already exists for current task");
+
+        var request = new Request(command);
         request.setTask(task.get());
-
         this.requestRepository.save(request);
         return request.getId();
     }
@@ -47,9 +52,8 @@ public class RequestCommandServiceImpl implements RequestCommandService {
     public Optional<Request> handle(UpdateRequestCommand command) {
         var requestId = command.requestId();
 
-        if (!this.requestRepository.existsById(requestId)) {
+        if (!this.requestRepository.existsById(requestId))
             throw new IllegalArgumentException("Request with id " + requestId + " does not exist");
-        }
 
         var requestToUpdate = this.requestRepository.findById(requestId).get();
         requestToUpdate.updateRequestStatus(command.requestStatus());
@@ -66,9 +70,9 @@ public class RequestCommandServiceImpl implements RequestCommandService {
     public void handle(DeleteRequestCommand command) {
         var requestId = command.requestId();
 
-        if (!requestRepository.existsById(requestId)) {
+        if (!requestRepository.existsById(requestId))
             throw new IllegalArgumentException("Request with id " + requestId + " does not exist");
-        }
+
         try {
             requestRepository.deleteById(requestId);
         } catch (Exception e) {
