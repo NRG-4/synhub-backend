@@ -61,7 +61,7 @@ public class TaskMetricsQueryServiceImpl implements TaskMetricsQueryService {
         List<Task> groupTasks = taskRepository.findByGroup_Id(groupId);
 
         List<Task> completedTasks = groupTasks.stream()
-                .filter(task -> task.getStatus() == TaskStatus.COMPLETED)
+                .filter(task -> task.getStatus() == TaskStatus.DONE)
                 .collect(Collectors.toList());
 
         double avg = completedTasks.stream()
@@ -182,7 +182,7 @@ public class TaskMetricsQueryServiceImpl implements TaskMetricsQueryService {
     public AvgCompletionTimeResource handle(GetAvgCompletionTimeForMemberQuery query) {
         List<Task> memberTasks = taskRepository.findByMember_Id(query.memberId());
         List<Task> completedTasks = memberTasks.stream()
-                .filter(task -> task.getStatus() == TaskStatus.COMPLETED)
+                .filter(task -> task.getStatus() == TaskStatus.DONE) // Cambiado a DONE
                 .collect(Collectors.toList());
         double avg = completedTasks.stream()
                 .mapToLong(Task::getTimePassed)
