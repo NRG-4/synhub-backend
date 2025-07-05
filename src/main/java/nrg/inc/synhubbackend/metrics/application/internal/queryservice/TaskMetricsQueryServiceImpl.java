@@ -80,13 +80,13 @@ public class TaskMetricsQueryServiceImpl implements TaskMetricsQueryService {
     public RescheduledTasksResource handle(GetRescheduledTasksQuery query) {
         List<Task> groupTasks = taskRepository.findByGroup_Id(query.groupId());
 
-        long rescheduled = groupTasks.stream()
-                .filter(task -> task.getTimesRearranged() > 0)
-                .count();
+        long totalRescheduledTimes = groupTasks.stream()
+                .mapToLong(Task::getTimesRearranged)
+                .sum();
 
         Map<String, Integer> details = Map.of(
                 "total", groupTasks.size(),
-                "rescheduled", (int) rescheduled
+                "rescheduled", (int) totalRescheduledTimes
         );
 
         List<Long> rescheduledMemberIds = groupTasks.stream()
@@ -95,7 +95,7 @@ public class TaskMetricsQueryServiceImpl implements TaskMetricsQueryService {
                 .distinct()
                 .collect(Collectors.toList());
 
-        return new RescheduledTasksResource("RESCHEDULED_TASKS", rescheduled, details, rescheduledMemberIds);
+        return new RescheduledTasksResource("RESCHEDULED_TASKS", totalRescheduledTimes, details, rescheduledMemberIds);
     }
 
     @Override
@@ -167,15 +167,15 @@ public class TaskMetricsQueryServiceImpl implements TaskMetricsQueryService {
     @Override
     public RescheduledTasksResource handle(GetRescheduledTasksForMemberQuery query) {
         List<Task> memberTasks = taskRepository.findByMember_Id(query.memberId());
-        long rescheduled = memberTasks.stream()
-                .filter(task -> task.getTimesRearranged() > 0)
-                .count();
+        long totalRescheduledTimes = memberTasks.stream()
+                .mapToLong(Task::getTimesRearranged)
+                .sum();
         Map<String, Integer> details = Map.of(
                 "total", memberTasks.size(),
-                "rescheduled", (int) rescheduled
+                "rescheduled", (int) totalRescheduledTimes
         );
-        List<Long> rescheduledMemberIds = rescheduled > 0 ? List.of(query.memberId()) : List.of();
-        return new RescheduledTasksResource("RESCHEDULED_TASKS_MEMBER", rescheduled, details, rescheduledMemberIds);
+        List<Long> rescheduledMemberIds = totalRescheduledTimes > 0 ? List.of(query.memberId()) : List.of();
+        return new RescheduledTasksResource("RESCHEDULED_TASKS_MEMBER", totalRescheduledTimes, details, rescheduledMemberIds);
     }
 
     @Override
