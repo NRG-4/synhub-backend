@@ -18,6 +18,10 @@ import nrg.inc.synhubbackend.metrics.domain.model.queries.GetAvgCompletionTimeQu
 import nrg.inc.synhubbackend.metrics.domain.model.queries.GetRescheduledTasksQuery;
 import nrg.inc.synhubbackend.metrics.domain.model.queries.GetTaskDistributionQuery;
 import nrg.inc.synhubbackend.metrics.domain.model.queries.GetTaskOverviewQuery;
+import nrg.inc.synhubbackend.metrics.domain.model.queries.GetTaskOverviewForMemberQuery;
+import nrg.inc.synhubbackend.metrics.domain.model.queries.GetTaskDistributionForMemberQuery;
+import nrg.inc.synhubbackend.metrics.domain.model.queries.GetRescheduledTasksForMemberQuery;
+import nrg.inc.synhubbackend.metrics.domain.model.queries.GetAvgCompletionTimeForMemberQuery;
 
 @Service
 public class TaskMetricsQueryServiceImpl implements TaskMetricsQueryService {
@@ -57,7 +61,7 @@ public class TaskMetricsQueryServiceImpl implements TaskMetricsQueryService {
         List<Task> groupTasks = taskRepository.findByGroup_Id(groupId);
 
         List<Task> completedTasks = groupTasks.stream()
-                .filter(task -> task.getStatus() == TaskStatus.COMPLETED)
+                .filter(task -> task.getStatus() == TaskStatus.DONE)
                 .collect(Collectors.toList());
 
         double avg = completedTasks.stream()
@@ -76,13 +80,13 @@ public class TaskMetricsQueryServiceImpl implements TaskMetricsQueryService {
     public RescheduledTasksResource handle(GetRescheduledTasksQuery query) {
         List<Task> groupTasks = taskRepository.findByGroup_Id(query.groupId());
 
-        long rescheduled = groupTasks.stream()
-                .filter(task -> task.getTimesRearranged() > 0)
-                .count();
+        long totalRescheduledTimes = groupTasks.stream()
+                .mapToLong(Task::getTimesRearranged)
+                .sum();
 
         Map<String, Integer> details = Map.of(
                 "total", groupTasks.size(),
-                "rescheduled", (int) rescheduled
+                "rescheduled", (int) totalRescheduledTimes
         );
 
         List<Long> rescheduledMemberIds = groupTasks.stream()
@@ -91,7 +95,7 @@ public class TaskMetricsQueryServiceImpl implements TaskMetricsQueryService {
                 .distinct()
                 .collect(Collectors.toList());
 
-        return new RescheduledTasksResource("RESCHEDULED_TASKS", rescheduled, details, rescheduledMemberIds);
+        return new RescheduledTasksResource("RESCHEDULED_TASKS", totalRescheduledTimes, details, rescheduledMemberIds);
     }
 
     @Override
@@ -132,5 +136,62 @@ public class TaskMetricsQueryServiceImpl implements TaskMetricsQueryService {
                 ));
 
         return new TaskOverviewResource("TASK_OVERVIEW", groupTasks.size(), converted);
+    }
+
+    @Override
+    public TaskOverviewResource handle(GetTaskOverviewForMemberQuery query) {
+        List<Task> memberTasks = taskRepository.findByMember_Id(query.memberId());
+        Map<String, Long> overview = memberTasks.stream()
+                .collect(Collectors.groupingBy(task -> task.getStatus().name(), Collectors.counting()));
+        Map<String, Integer> converted = overview.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        e -> e.getValue().intValue()
+                ));
+        return new TaskOverviewResource("TASK_OVERVIEW_MEMBER", memberTasks.size(), converted);
+    }
+
+    @Override
+    public TaskDistributionResource handle(GetTaskDistributionForMemberQuery query) {
+        List<Task> memberTasks = taskRepository.findByMember_Id(query.memberId());
+        Optional<User> userOpt = userRepository.findAll().stream()
+                .filter(u -> u.getMember() != null && u.getMember().getId().equals(query.memberId()))
+                .findFirst();
+        String memberName = userOpt.map(u -> u.getName() + " " + u.getSurname()).orElse("Desconocido");
+        Map<String, MemberTaskInfo> details = Map.of(
+                query.memberId().toString(), new MemberTaskInfo(memberName, memberTasks.size())
+        );
+        return new TaskDistributionResource("TASK_DISTRIBUTION_MEMBER", memberTasks.size(), details);
+    }
+
+    @Override
+    public RescheduledTasksResource handle(GetRescheduledTasksForMemberQuery query) {
+        List<Task> memberTasks = taskRepository.findByMember_Id(query.memberId());
+        long totalRescheduledTimes = memberTasks.stream()
+                .mapToLong(Task::getTimesRearranged)
+                .sum();
+        Map<String, Integer> details = Map.of(
+                "total", memberTasks.size(),
+                "rescheduled", (int) totalRescheduledTimes
+        );
+        List<Long> rescheduledMemberIds = totalRescheduledTimes > 0 ? List.of(query.memberId()) : List.of();
+        return new RescheduledTasksResource("RESCHEDULED_TASKS_MEMBER", totalRescheduledTimes, details, rescheduledMemberIds);
+    }
+
+    @Override
+    public AvgCompletionTimeResource handle(GetAvgCompletionTimeForMemberQuery query) {
+        List<Task> memberTasks = taskRepository.findByMember_Id(query.memberId());
+        List<Task> completedTasks = memberTasks.stream()
+                .filter(task -> task.getStatus() == TaskStatus.DONE) // Cambiado a DONE
+                .collect(Collectors.toList());
+        double avg = completedTasks.stream()
+                .mapToLong(Task::getTimePassed)
+                .average()
+                .orElse(0);
+        return new AvgCompletionTimeResource(
+                "AVG_COMPLETION_TIME_MEMBER",
+                avg / (1000 * 60 * 60 * 24),
+                Map.of("completedTasks", completedTasks.size())
+        );
     }
 }
