@@ -3,17 +3,23 @@ package nrg.inc.synhubbackend.tasks.interfaces.rest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import nrg.inc.synhubbackend.groups.domain.model.commands.RemoveMemberFromGroupCommand;
 import nrg.inc.synhubbackend.groups.domain.model.queries.GetGroupByMemberIdQuery;
+import nrg.inc.synhubbackend.groups.domain.services.GroupCommandService;
 import nrg.inc.synhubbackend.groups.domain.services.GroupQueryService;
 import nrg.inc.synhubbackend.groups.interfaces.rest.resources.GroupResource;
 import nrg.inc.synhubbackend.groups.interfaces.rest.transform.GroupResourceFromEntityAssembler;
+import nrg.inc.synhubbackend.tasks.domain.model.commands.DeleteTasksByMemberId;
 import nrg.inc.synhubbackend.tasks.domain.model.queries.GetAllTasksByMemberId;
 import nrg.inc.synhubbackend.tasks.domain.model.queries.GetMemberByIdQuery;
 import nrg.inc.synhubbackend.tasks.domain.model.queries.GetMemberByUsernameQuery;
 import nrg.inc.synhubbackend.tasks.domain.services.MemberQueryService;
+import nrg.inc.synhubbackend.tasks.domain.services.TaskCommandService;
 import nrg.inc.synhubbackend.tasks.domain.services.TaskQueryService;
+import nrg.inc.synhubbackend.tasks.interfaces.rest.resources.ExtendedGroupResource;
 import nrg.inc.synhubbackend.tasks.interfaces.rest.resources.MemberResource;
 import nrg.inc.synhubbackend.tasks.interfaces.rest.resources.TaskResource;
+import nrg.inc.synhubbackend.tasks.interfaces.rest.transform.ExtendedGroupResourceFromEntityAssembler;
 import nrg.inc.synhubbackend.tasks.interfaces.rest.transform.MemberResourceFromEntityAssembler;
 import nrg.inc.synhubbackend.tasks.interfaces.rest.transform.TaskResourceFromEntityAssembler;
 import org.springframework.http.ResponseEntity;
@@ -32,11 +38,15 @@ import java.util.stream.Collectors;
 public class MemberController {
     private final MemberQueryService memberQueryService;
     private final GroupQueryService groupQueryService;
+    private final GroupCommandService groupCommandService;
     private final TaskQueryService taskQueryService;
-    public MemberController(MemberQueryService memberQueryService, GroupQueryService groupQueryService, TaskQueryService taskQueryService) {
+    private final TaskCommandService taskCommandService;
+    public MemberController(MemberQueryService memberQueryService, GroupQueryService groupQueryService, GroupCommandService groupCommandService, TaskQueryService taskQueryService, TaskCommandService taskCommandService) {
         this.memberQueryService = memberQueryService;
         this.groupQueryService = groupQueryService;
+        this.groupCommandService = groupCommandService;
         this.taskQueryService = taskQueryService;
+        this.taskCommandService = taskCommandService;
     }
 
     @GetMapping("/details")
@@ -70,7 +80,7 @@ public class MemberController {
 
     @GetMapping("/group")
     @Operation(summary = "Get group by member authenticated", description = "Retrieve the group associated with the authenticated member")
-    public ResponseEntity<GroupResource> getGroupByMemberId(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<ExtendedGroupResource> getGroupByMemberId(@AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
         var getMemberByUsernameQuery = new GetMemberByUsernameQuery(username);
         var member = this.memberQueryService.handle(getMemberByUsernameQuery);
@@ -82,7 +92,7 @@ public class MemberController {
         if (group.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        var groupResource = GroupResourceFromEntityAssembler.toResourceFromEntity(group.get());
+        var groupResource = ExtendedGroupResourceFromEntityAssembler.toResourceFromEntity(group.get());
         return ResponseEntity.ok(groupResource);
     }
 
@@ -106,5 +116,73 @@ public class MemberController {
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(taskResources);
+    }
+
+    @DeleteMapping("/group/leave")
+    @Operation(summary = "Leave group by member authenticated", description = "Allows the authenticated member to leave their group.")
+    public ResponseEntity<Void> leaveGroupByMemberAuthenticated(@AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails.getUsername();
+
+        var getMemberByUsernameQuery = new GetMemberByUsernameQuery(username);
+
+        var member = this.memberQueryService.handle(getMemberByUsernameQuery);
+
+        if(member.isEmpty()) return ResponseEntity.notFound().build();
+
+        var getGroupByMemberIdQuery = new GetGroupByMemberIdQuery(member.get().getId());
+
+        var group = this.groupQueryService.handle(getGroupByMemberIdQuery);
+
+        if(group.isEmpty()) return ResponseEntity.notFound().build();
+
+        taskCommandService.handle(new DeleteTasksByMemberId(member.get().getId()));
+
+        var removeMemberFromGroupCommand = new RemoveMemberFromGroupCommand(
+                group.get().getId(),
+                member.get().getId()
+        );
+
+        this.groupCommandService.handle(removeMemberFromGroupCommand);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/tasks/next")
+    @Operation(summary = "Get the next task by authenticated member", description = "Fetches the next task for the authenticated member.")
+    public ResponseEntity<TaskResource> getNextTaskByMemberAuthenticated(@AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails.getUsername();
+
+        var getMemberByUsernameQuery = new GetMemberByUsernameQuery(username);
+
+        var member = this.memberQueryService.handle(getMemberByUsernameQuery);
+
+        if(member.isEmpty()) return ResponseEntity.notFound().build();
+
+        var getAllTasksByMemberId = new GetAllTasksByMemberId(member.get().getId());
+
+        var tasks = taskQueryService.handle(getAllTasksByMemberId);
+
+        if (tasks.isEmpty()) return ResponseEntity.notFound().build();
+
+        var now = LocalDateTime.now();
+
+        var nextTask = tasks.stream()
+                .filter(task -> {
+                    if (task.getDueDate() == null) return false;
+                    LocalDateTime dueDate = task.getDueDate().toInstant()
+                            .atZone(ZoneId.systemDefault())
+                            .toLocalDateTime();
+                    return !dueDate.isBefore(now);
+                })
+                .min((t1, t2) -> {
+                    LocalDateTime d1 = t1.getDueDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+                    LocalDateTime d2 = t2.getDueDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+                    return d1.compareTo(d2);
+                });
+
+        if (nextTask.isEmpty()) return ResponseEntity.notFound().build();
+
+        var taskResource = TaskResourceFromEntityAssembler.toResourceFromEntity(nextTask.get());
+        return ResponseEntity.ok(taskResource);
     }
 }

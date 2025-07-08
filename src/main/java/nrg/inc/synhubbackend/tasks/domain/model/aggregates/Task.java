@@ -11,6 +11,8 @@ import nrg.inc.synhubbackend.tasks.domain.model.commands.UpdateTaskCommand;
 import nrg.inc.synhubbackend.tasks.domain.model.commands.UpdateTaskStatusCommand;
 import nrg.inc.synhubbackend.tasks.domain.model.valueobjects.TaskStatus;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Date;
 
 @Getter
@@ -22,11 +24,12 @@ public class Task extends AuditableAbstractAggregateRoot<Task> {
     @NonNull
     private String description;
 
+    @Setter
     @Enumerated(EnumType.STRING)
     private TaskStatus status;
 
     @NonNull
-    private Date dueDate;
+    private OffsetDateTime dueDate;
 
     @Setter
     @ManyToOne
@@ -61,11 +64,12 @@ public class Task extends AuditableAbstractAggregateRoot<Task> {
         var commandStatus = TaskStatus.valueOf(command.status());
 
         if(this.status == TaskStatus.IN_PROGRESS && commandStatus == TaskStatus.COMPLETED) {
-            if(timesRearranged > 0){
-                long updatedAt = this.getUpdatedAt().getTime();
-                this.timePassed += new Date().getTime() - updatedAt;
-            }else {
-                this.timePassed = new Date().getTime() - this.getCreatedAt().getTime();
+            OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+            if (timesRearranged > 0) {
+                long updatedAt = this.getUpdatedAt().toInstant().toEpochMilli();
+                this.timePassed += now.toInstant().toEpochMilli() - updatedAt;
+            } else {
+                this.timePassed = now.toInstant().toEpochMilli() - this.getCreatedAt().toInstant().toEpochMilli();
             }
         } else if(this.status == TaskStatus.COMPLETED && commandStatus == TaskStatus.IN_PROGRESS) {
             timesRearranged++;
@@ -82,6 +86,11 @@ public class Task extends AuditableAbstractAggregateRoot<Task> {
         }
         if(command.dueDate() != null) {
             this.dueDate = command.dueDate();
+            if(command.dueDate().isBefore(OffsetDateTime.now(ZoneOffset.UTC))) {
+                this.status = TaskStatus.EXPIRED;
+            } else {
+                this.status = TaskStatus.IN_PROGRESS;
+            }
         }
     }
 }

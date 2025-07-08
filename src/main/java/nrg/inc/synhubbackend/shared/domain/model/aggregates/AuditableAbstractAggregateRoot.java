@@ -7,7 +7,9 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.domain.AbstractAggregateRoot;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.util.Date;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 
 @EntityListeners(AuditingEntityListener.class)
 @MappedSuperclass
@@ -18,12 +20,22 @@ public class AuditableAbstractAggregateRoot <T extends AbstractAggregateRoot<T>>
     private Long id;
 
     @Getter
-    @CreatedDate
     @Column(nullable = false, updatable = false)
-    private Date createdAt;
+    private OffsetDateTime createdAt;
 
     @Getter
-    @LastModifiedDate
     @Column(nullable = false)
-    private Date updatedAt;
+    private OffsetDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+        this.createdAt = now;
+        this.updatedAt = now;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = OffsetDateTime.now(ZoneOffset.UTC);
+    }
 }
