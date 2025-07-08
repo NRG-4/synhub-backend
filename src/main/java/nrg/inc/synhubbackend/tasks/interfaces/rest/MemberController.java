@@ -164,9 +164,13 @@ public class MemberController {
 
         if (tasks.isEmpty()) return ResponseEntity.notFound().build();
 
+        var inProgressTasks = tasks.stream()
+                .filter(task -> task.getStatus().equals("IN_PROGRESS"))
+                .collect(Collectors.toList());
+
         var now = LocalDateTime.now();
 
-        var nextTask = tasks.stream()
+        var nextTask = inProgressTasks.stream()
                 .filter(task -> {
                     if (task.getDueDate() == null) return false;
                     LocalDateTime dueDate = task.getDueDate().toInstant()
