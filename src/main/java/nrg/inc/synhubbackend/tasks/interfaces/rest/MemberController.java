@@ -13,6 +13,7 @@ import nrg.inc.synhubbackend.tasks.domain.model.commands.DeleteTasksByMemberId;
 import nrg.inc.synhubbackend.tasks.domain.model.queries.GetAllTasksByMemberId;
 import nrg.inc.synhubbackend.tasks.domain.model.queries.GetMemberByIdQuery;
 import nrg.inc.synhubbackend.tasks.domain.model.queries.GetMemberByUsernameQuery;
+import nrg.inc.synhubbackend.tasks.domain.model.valueobjects.TaskStatus;
 import nrg.inc.synhubbackend.tasks.domain.services.MemberQueryService;
 import nrg.inc.synhubbackend.tasks.domain.services.TaskCommandService;
 import nrg.inc.synhubbackend.tasks.domain.services.TaskQueryService;
@@ -165,14 +166,16 @@ public class MemberController {
         if (tasks.isEmpty()) return ResponseEntity.notFound().build();
 
         var inProgressTasks = tasks.stream()
-                .filter(task -> task.getStatus().equals("IN_PROGRESS"))
+                .filter(task -> task.getStatus().equals(TaskStatus.IN_PROGRESS))
                 .collect(Collectors.toList());
 
-        var now = LocalDateTime.now();
+        var now = LocalDateTime.now(ZoneId.of("UTC"));
 
         var nextTask = inProgressTasks.stream()
                 .filter(task -> {
-                    if (task.getDueDate() == null) return false;
+                    if (task.getDueDate() == null) {
+                        return false;
+                    }
                     LocalDateTime dueDate = task.getDueDate().toInstant()
                             .atZone(ZoneId.systemDefault())
                             .toLocalDateTime();
@@ -183,7 +186,6 @@ public class MemberController {
                     LocalDateTime d2 = t2.getDueDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
                     return d1.compareTo(d2);
                 });
-
         if (nextTask.isEmpty()) return ResponseEntity.notFound().build();
 
         var taskResource = TaskResourceFromEntityAssembler.toResourceFromEntity(nextTask.get());
