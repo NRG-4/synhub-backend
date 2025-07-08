@@ -2,6 +2,7 @@ package nrg.inc.synhubbackend.requests.application.internal.commandservices;
 
 import nrg.inc.synhubbackend.requests.domain.model.aggregates.Request;
 import nrg.inc.synhubbackend.requests.domain.model.commands.CreateRequestCommand;
+import nrg.inc.synhubbackend.requests.domain.model.commands.DeleteAllRequestsByTaskIdCommand;
 import nrg.inc.synhubbackend.requests.domain.model.commands.DeleteRequestCommand;
 import nrg.inc.synhubbackend.requests.domain.model.commands.UpdateRequestCommand;
 import nrg.inc.synhubbackend.requests.domain.model.valueobjects.RequestType;
@@ -10,6 +11,7 @@ import nrg.inc.synhubbackend.requests.infrastructure.persistence.jpa.repositorie
 import nrg.inc.synhubbackend.tasks.interfaces.acl.TasksContextFacade;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -38,9 +40,6 @@ public class RequestCommandServiceImpl implements RequestCommandService {
 
         if (task.isEmpty())
             throw new IllegalArgumentException("Task with id " + command.taskId() + " does not exist");
-
-        if (this.requestRepository.existsByTaskId(command.taskId()))
-            throw new IllegalArgumentException("A request already exists for current task");
 
         var request = new Request(command);
         request.setTask(task.get());
@@ -78,6 +77,20 @@ public class RequestCommandServiceImpl implements RequestCommandService {
         } catch (Exception e) {
             throw new IllegalArgumentException("Error while deleting request: " + e.getMessage());
         }
+    }
 
+    @Override
+    @Transactional
+    public void handle(DeleteAllRequestsByTaskIdCommand command) {
+        var taskId = command.taskId();
+
+        if (this.tasksContextFacade.getTaskById(taskId).isEmpty())
+            throw new IllegalArgumentException("Task with id " + taskId + " does not exist");
+
+        try {
+            this.requestRepository.deleteByTaskId(taskId);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Error while deleting requests for task: " + e.getMessage());
+        }
     }
 }
