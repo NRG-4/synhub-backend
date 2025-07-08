@@ -3,7 +3,7 @@ package nrg.inc.synhubbackend.requests.application.internal.queryservices;
 import nrg.inc.synhubbackend.requests.domain.model.aggregates.Request;
 import nrg.inc.synhubbackend.requests.domain.model.queries.GetAllRequestsQuery;
 import nrg.inc.synhubbackend.requests.domain.model.queries.GetRequestByIdQuery;
-import nrg.inc.synhubbackend.requests.domain.model.queries.GetRequestByTaskIdQuery;
+import nrg.inc.synhubbackend.requests.domain.model.queries.GetRequestsByTaskIdQuery;
 import nrg.inc.synhubbackend.requests.domain.services.RequestQueryService;
 import nrg.inc.synhubbackend.requests.infrastructure.persistence.jpa.repositories.RequestRepository;
 import org.springframework.stereotype.Service;
@@ -26,7 +26,7 @@ public class RequestQueryServiceImpl implements RequestQueryService {
     }
 
     @Override
-    public Optional<Request> handle(GetRequestByTaskIdQuery query) {
+    public List<Request> handle(GetRequestsByTaskIdQuery query) {
         return requestRepository.findByTaskId(query.taskId());
     }
 

@@ -5,6 +5,8 @@ import io.jsonwebtoken.Jwts;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import nrg.inc.synhubbackend.requests.domain.model.commands.DeleteAllRequestsByTaskIdCommand;
+import nrg.inc.synhubbackend.requests.domain.services.RequestCommandService;
 import nrg.inc.synhubbackend.tasks.domain.model.commands.DeleteTaskCommand;
 import nrg.inc.synhubbackend.tasks.domain.model.commands.UpdateTaskStatusCommand;
 import nrg.inc.synhubbackend.tasks.domain.model.queries.GetAllTaskByStatusQuery;
@@ -30,10 +32,12 @@ public class TaskController {
 
     private final TaskQueryService taskQueryService;
     private final TaskCommandService taskCommandService;
+    private final RequestCommandService requestCommandService;
 
-    public TaskController(TaskQueryService taskQueryService, TaskCommandService taskCommandService) {
+    public TaskController(TaskQueryService taskQueryService, TaskCommandService taskCommandService, RequestCommandService requestCommandService, RequestCommandService requestCommandService1) {
         this.taskQueryService = taskQueryService;
         this.taskCommandService = taskCommandService;
+        this.requestCommandService = requestCommandService1;
     }
 
     @GetMapping("/{taskId}")
@@ -86,8 +90,13 @@ public class TaskController {
     @DeleteMapping("/{taskId}")
     @Operation(summary = "Delete a task by id", description = "Delete a task by id")
     public ResponseEntity<Void> deleteTask(@PathVariable Long taskId) {
+        var deleteRequestsCommand = new DeleteAllRequestsByTaskIdCommand(taskId);
+        this.requestCommandService.handle(deleteRequestsCommand);
+
         var deleteTaskCommand = new DeleteTaskCommand(taskId);
         this.taskCommandService.handle(deleteTaskCommand);
+
+
         return ResponseEntity.noContent().build();
     }
 }
