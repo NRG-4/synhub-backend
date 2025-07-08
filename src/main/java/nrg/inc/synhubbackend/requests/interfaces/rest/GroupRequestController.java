@@ -6,7 +6,7 @@ import nrg.inc.synhubbackend.groups.domain.model.queries.GetGroupByLeaderIdQuery
 import nrg.inc.synhubbackend.groups.domain.model.queries.GetLeaderByUsernameQuery;
 import nrg.inc.synhubbackend.groups.domain.services.GroupQueryService;
 import nrg.inc.synhubbackend.groups.domain.services.LeaderQueryService;
-import nrg.inc.synhubbackend.requests.domain.model.queries.GetRequestByTaskIdQuery;
+import nrg.inc.synhubbackend.requests.domain.model.queries.GetRequestsByTaskIdQuery;
 import nrg.inc.synhubbackend.requests.domain.services.RequestQueryService;
 import nrg.inc.synhubbackend.requests.interfaces.rest.resources.RequestResource;
 import nrg.inc.synhubbackend.requests.interfaces.rest.transform.RequestResourceFromEntityAssembler;
@@ -75,10 +75,11 @@ public class GroupRequestController {
                 .map(TaskResourceFromEntityAssembler::toResourceFromEntity)
                 .toList();
 
+        // Get all requests from each task
         var requestResources = taskResources.stream()
                 .flatMap(task -> {
-                    var getRequestByTaskIdQuery = new GetRequestByTaskIdQuery(task.id());
-                    return requestQueryService.handle(getRequestByTaskIdQuery)
+                    var getRequestsByTaskIdQuery = new GetRequestsByTaskIdQuery(task.id());
+                    return requestQueryService.handle(getRequestsByTaskIdQuery)
                             .stream()
                             .map(RequestResourceFromEntityAssembler::toResourceFromEntity);
                 })
@@ -106,7 +107,7 @@ public class GroupRequestController {
 
         var requestResources = taskResources.stream()
                 .flatMap(task -> {
-                    var getRequestByTaskIdQuery = new GetRequestByTaskIdQuery(task.id());
+                    var getRequestByTaskIdQuery = new GetRequestsByTaskIdQuery(task.id());
                     return requestQueryService.handle(getRequestByTaskIdQuery)
                             .stream()
                             .map(RequestResourceFromEntityAssembler::toResourceFromEntity);

@@ -4,8 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import nrg.inc.synhubbackend.requests.domain.model.commands.DeleteRequestCommand;
 import nrg.inc.synhubbackend.requests.domain.model.queries.GetRequestByIdQuery;
-import nrg.inc.synhubbackend.requests.domain.model.queries.GetRequestByTaskIdQuery;
-import nrg.inc.synhubbackend.requests.domain.model.valueobjects.RequestType;
+import nrg.inc.synhubbackend.requests.domain.model.queries.GetRequestsByTaskIdQuery;
 import nrg.inc.synhubbackend.requests.domain.services.RequestCommandService;
 import nrg.inc.synhubbackend.requests.domain.services.RequestQueryService;
 import nrg.inc.synhubbackend.requests.interfaces.rest.resources.CreateRequestResource;
@@ -24,9 +23,12 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT})
 @RestController
-@RequestMapping(value = "/api/v1/tasks/{taskId}/request", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/api/v1/tasks/{taskId}/requests", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Request", description = "Request management API")
 public class RequestController {
 
@@ -75,30 +77,38 @@ public class RequestController {
     }
 
     @GetMapping
-    @Operation(summary = "Get a request from a task", description = "Get a request from a task id")
-    public ResponseEntity<RequestResource> getRequestByTaskId(@PathVariable Long taskId) {
-        var getRequestByTaskIdQuery = new GetRequestByTaskIdQuery(taskId);
-        var optionalRequest = this.requestQueryService.handle(getRequestByTaskIdQuery);
+    @Operation(summary = "Get requests from a task", description = "Get a list of requests from a task id")
+    public ResponseEntity<List<RequestResource>> getRequestsByTaskId(@PathVariable Long taskId) {
+        var getRequestsByTaskIdQuery = new GetRequestsByTaskIdQuery(taskId);
+        var requests = this.requestQueryService.handle(getRequestsByTaskIdQuery);
 
-        if (optionalRequest.isPresent()) {
-            var requestResource = RequestResourceFromEntityAssembler.toResourceFromEntity(optionalRequest.get());
-            return ResponseEntity.ok(requestResource);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        var requestResources = requests.stream()
+                .map(RequestResourceFromEntityAssembler::toResourceFromEntity)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(requestResources);
     }
 
-    @PutMapping("/status/{status}")
-    @Operation(summary = "Update a request status from a task", description = "Update the status of a request from a task")
-    public ResponseEntity<RequestResource> updateRequestStatus(@PathVariable Long taskId, @PathVariable String status) {
-        var getRequestByTaskIdQuery = new GetRequestByTaskIdQuery(taskId);
-        var optionalRequest = this.requestQueryService.handle(getRequestByTaskIdQuery);
+    @GetMapping("/{requestId}")
+    @Operation(summary = "Get a request by id", description = "Get a request by id")
+    public ResponseEntity<RequestResource> getRequestById(@PathVariable Long taskId, @PathVariable Long requestId) {
+        var getRequestByIdQuery = new GetRequestByIdQuery(requestId);
+        var optionalRequest = this.requestQueryService.handle(getRequestByIdQuery);
 
         if (optionalRequest.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        if (!optionalRequest.get().getTask().getId().equals(taskId)) {
             return ResponseEntity.badRequest().build();
         }
 
-        var requestId = optionalRequest.get().getId();
+        var requestResource = RequestResourceFromEntityAssembler.toResourceFromEntity(optionalRequest.get());
+        return ResponseEntity.ok(requestResource);
+    }
+
+    @PutMapping("/{requestId}/status/{status}")
+    @Operation(summary = "Update a request status", description = "Update the status of a request")
+    public ResponseEntity<RequestResource> updateRequestStatus(@PathVariable Long taskId, @PathVariable Long requestId, @PathVariable String status) {
         var updateRequestCommand = UpdateRequestCommandFromResourceAssembler.toCommandFromResource(requestId, status);
         var updatedRequest = this.requestCommandService.handle(updateRequestCommand);
 
@@ -110,17 +120,9 @@ public class RequestController {
         return ResponseEntity.ok(requestResource);
     }
 
-    @DeleteMapping
-    @Operation(summary = "Delete a request by task id", description = "Delete a request by task id")
-    public ResponseEntity<Void> deleteRequestByTaskId(@PathVariable Long taskId) {
-        var getRequestByTaskIdQuery = new GetRequestByTaskIdQuery(taskId);
-        var optionalRequest = this.requestQueryService.handle(getRequestByTaskIdQuery);
-
-        if (optionalRequest.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        var requestId = optionalRequest.get().getId();
+    @DeleteMapping("/{requestId}")
+    @Operation(summary = "Delete a request by id", description = "Delete a request by id")
+    public ResponseEntity<Void> deleteRequestById(@PathVariable Long taskId, @PathVariable Long requestId) {
         var deleteRequestCommand = new DeleteRequestCommand(requestId);
         this.requestCommandService.handle(deleteRequestCommand);
         return ResponseEntity.noContent().build();
