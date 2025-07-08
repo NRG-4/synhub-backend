@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import nrg.inc.synhubbackend.tasks.domain.model.queries.GetAllTasksByMemberId;
 import nrg.inc.synhubbackend.tasks.domain.model.queries.GetMemberByUsernameQuery;
+import nrg.inc.synhubbackend.tasks.domain.model.valueobjects.TaskStatus;
 import nrg.inc.synhubbackend.tasks.domain.services.MemberQueryService;
 import nrg.inc.synhubbackend.tasks.domain.services.TaskCommandService;
 import nrg.inc.synhubbackend.tasks.domain.services.TaskQueryService;
@@ -70,9 +71,13 @@ public class MemberTaskController {
 
         if (tasks.isEmpty()) return ResponseEntity.notFound().build();
 
-        var now = LocalDateTime.now();
+        var inProgressTasks = tasks.stream()
+                .filter(task -> task.getStatus().equals(TaskStatus.IN_PROGRESS))
+                .collect(Collectors.toList());
 
-        var nextTask = tasks.stream()
+        var now = LocalDateTime.now(ZoneId.of("UTC"));
+
+        var nextTask = inProgressTasks.stream()
                 .filter(task -> {
                     if (task.getDueDate() == null) return false;
                     LocalDateTime dueDate = task.getDueDate().toInstant()
