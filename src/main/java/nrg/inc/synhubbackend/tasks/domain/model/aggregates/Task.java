@@ -73,6 +73,10 @@ public class Task extends AuditableAbstractAggregateRoot<Task> {
             }
         } else if(this.status == TaskStatus.COMPLETED && commandStatus == TaskStatus.IN_PROGRESS) {
             timesRearranged++;
+        } else if (this.status == TaskStatus.ON_HOLD && commandStatus == TaskStatus.IN_PROGRESS) {
+            timesRearranged++;
+        } else if (this.status == TaskStatus.EXPIRED && commandStatus == TaskStatus.IN_PROGRESS) {
+            timesRearranged++;
         }
         this.status = TaskStatus.valueOf(command.status());
     }
